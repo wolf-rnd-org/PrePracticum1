@@ -9,10 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-//builder.Services.AddControllers();
+builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register the ConvertController
+builder.Services.AddScoped<IConvertService, ConvertService>();
 
 // Configure IIS and Kestrel for larger file uploads
 builder.Services.Configure<IISServerOptions>(options =>
@@ -55,7 +58,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapEndpoints();
+app.MapControllers();
 
-app.MapGet("/", () => { return "FFmpeg API is running"; });
+app.MapGet("/", () => "FFmpeg API is running");
 app.Run();
 

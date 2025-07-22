@@ -20,6 +20,57 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/watermark", AddWatermark)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+
+            app.MapPost("/api/video/cut", CutVideo)
+           .DisableAntiforgery()
+           .WithMetadata(new RequestSizeLimitAttribute(104857600));
+
+        }
+        private static async Task<IResult> CutVideo(HttpContext context, [FromForm] CutVideoDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var videoService = context.RequestServices.GetRequiredService<VideoCuttingService>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            if (dto.VideoFile == null || string.IsNullOrWhiteSpace(dto.StartTime) || string.IsNullOrWhiteSpace(dto.EndTime))
+                return Results.BadRequest("Missing required fields");
+
+            try
+            {
+                string inputFile = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFile = await fileService.GenerateUniqueFileNameAsync(extension);
+
+                var model = new CutVideoModel
+                {
+                    InputFile = inputFile,
+                    OutputFile = outputFile,
+                    StartTime = dto.StartTime,
+                    EndTime = dto.EndTime
+                };
+
+                // קוראים לפונקציית החיתוך שמחזירה bool
+                bool success = await videoService.CutVideoAsync(model);
+
+                if (!success)
+                {
+                    logger.LogError("Cutting video failed");
+                    return Results.Problem("Failed to cut video", statusCode: 500);
+                }
+
+                // אם הצליחו לחתוך, קוראים את קובץ הפלט
+                byte[] output = await fileService.GetOutputFileAsync(outputFile);
+
+                // מנקים קבצים זמניים
+                await fileService.CleanupTempFilesAsync(new[] { inputFile, outputFile });
+
+                return Results.File(output, "video/mp4", "cut_" + dto.VideoFile.FileName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error cutting video");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
         }
 
         private static async Task<IResult> AddWatermark(

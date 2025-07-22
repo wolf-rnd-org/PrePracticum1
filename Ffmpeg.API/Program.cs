@@ -1,6 +1,7 @@
 using Ffmpeg.Command;
 using FFmpeg.API.Endpoints;
 using FFmpeg.Core.Interfaces;
+using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -42,6 +43,10 @@ builder.Services.AddScoped<IFFmpegServiceFactory>(provider =>
 // Add file service for handling temporary files
 builder.Services.AddScoped<IFileService, FileService>();
 
+ // או Services אם זה השם
+
+builder.Services.AddScoped<CutVideoCommand>();
+builder.Services.AddScoped<VideoCuttingService>();
 
 var app = builder.Build();
 

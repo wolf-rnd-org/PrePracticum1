@@ -20,6 +20,11 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/watermark", AddWatermark)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+
+            app.MapPost("/api/video/fadein", AddFadeInEffect)
+                .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+
         }
 
         private static async Task<IResult> AddWatermark(
@@ -95,5 +100,77 @@ namespace FFmpeg.API.Endpoints
             }
 
         }
+
+        private static async Task<IResult> AddFadeInEffect(
+     HttpContext context,
+     [FromForm] FadeEffectDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                // Validate request
+                if (dto.VideoFile == null)
+                {
+                    return Results.BadRequest("Video file is required");
+                }
+
+                // Save uploaded file
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+
+                // Generate output filename
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, await fileService.GenerateUniqueFileNameAsync(extension));
+
+                // Track files to clean up
+                List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
+
+                try
+                {
+                    // Create and execute the fade effect command
+                    var command = ffmpegService.CreateFadeEffectCommand();
+                    var result = await command.ExecuteAsync(new FadeEffectModel
+                    {
+                        InputFilePath = videoFileName,
+                        OutputFilePath = outputFileName,
+                        FadeInDurationSeconds = dto.FadeInDurationSeconds
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to add fade effect: " + result.ErrorMessage, statusCode: 500);
+                    }
+
+                    // Read the output file
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+
+                    // Clean up temporary files
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    // Return the file
+                    return Results.File(fileBytes, "video/mp4", dto.OutputFileName);
+
+
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing fade-in request");
+                    // Clean up on error
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in AddFadeInEffect endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
+
     }
 }

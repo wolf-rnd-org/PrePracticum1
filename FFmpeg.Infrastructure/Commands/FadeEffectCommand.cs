@@ -1,4 +1,5 @@
 ﻿using Ffmpeg.Command.Commands;
+using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
@@ -21,27 +22,20 @@ namespace FFmpeg.Infrastructure.Commands
         public async Task<CommandResult> ExecuteAsync(FadeEffectModel model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
-            if (string.IsNullOrEmpty(model.InputFile)) throw new ArgumentException("Input file required");
-            if (string.IsNullOrEmpty(model.OutputFile)) throw new ArgumentException("Output file required");
+            if (string.IsNullOrEmpty(model.InputFilePath)) throw new ArgumentException("Input file required");
+            if (string.IsNullOrEmpty(model.OutputFilePath)) throw new ArgumentException("Output file required");
 
-            string fadeFilter = $"fade=t=in:st=0:d={model.DurationSeconds}";
+            string fadeFilter = $"fade=t=in:st=0:d={model.FadeInDurationSeconds}";
 
             CommandBuilder = _commandBuilder
-                .SetInput(model.InputFile)
-                .AddOption($"-vf \"{fadeFilter}\"")      
-                .SetVideoCodec(model.VideoCodec)
-                .SetOutput(model.OutputFile);
-
-            if (model.IsVideo)
-            {
-                CommandBuilder.SetVideoCodec(model.VideoCodec);
-            }
-
-            CommandBuilder.SetOutput(model.OutputFile, model.IsVideo ? false : true);
-
+                .SetInput(model.InputFilePath)
+                .AddOption($"-vf {fadeFilter}")
+                .SetVideoCodec("libx264")  
+                .SetOutput(model.OutputFilePath);
 
             return await RunAsync();
         }
+
 
     }
 }

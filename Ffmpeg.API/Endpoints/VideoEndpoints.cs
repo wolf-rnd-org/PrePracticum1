@@ -110,27 +110,20 @@ namespace FFmpeg.API.Endpoints
 
             try
             {
-
                 if (dto.VideoFile == null || dto.VideoFile.Length == 0)
-                {
                     return Results.BadRequest("Video file is required");
-                }
 
                 if (string.IsNullOrWhiteSpace(dto.FrameColor))
-                {
                     dto.FrameColor = "blue";
-                }
 
                 int borderSize;
                 if (!int.TryParse(dto.BorderSize, out borderSize) || borderSize <= 0)
-                {
-                    borderSize = 20; 
-                }
+                    borderSize = 20;
+
                 string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string extension = Path.GetExtension(dto.VideoFile.FileName);
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-
-                List<string> filesToCleanup = new List<string> { inputFileName, outputFileName };
+                List<string> filesToCleanup = new() { inputFileName, outputFileName };
 
                 try
                 {
@@ -153,9 +146,7 @@ namespace FFmpeg.API.Endpoints
                     }
 
                     byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
-
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-
                     return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
                 }
                 catch (Exception ex)
@@ -171,5 +162,6 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+
     }
 }

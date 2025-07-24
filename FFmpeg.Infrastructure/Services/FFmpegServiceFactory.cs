@@ -16,6 +16,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
 
+        ICommand<BorderModel> CreateBorderCommand();
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -43,5 +44,10 @@ namespace FFmpeg.Infrastructure.Services
             return new FadeEffectCommand(_executor, _commandBuilder);
         }
 
+
+        public ICommand<BorderModel> CreateBorderCommand()
+        {
+            return new BorderCommand(_executor, _commandBuilder);
+        }
     }
 }

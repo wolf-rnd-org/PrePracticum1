@@ -4,7 +4,6 @@
     {
         public IFormFile VideoFile { get; set; }
         public IFormFile BackgroundFile { get; set; }
-
     }
 
 

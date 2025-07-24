@@ -24,7 +24,6 @@ namespace Ffmpeg.Command.Commands
                 .AddOption($"-filter_complex \"[0:v]chromakey={model.GreenColorHex}:{model.Similarity}:{model.Blend}[ckout];[1:v][ckout]overlay[out]\"")
                 .AddOption("-map \"[out]\"")
                 .SetVideoCodec(model.VideoCodec);
-
             CommandBuilder.SetOutput(model.OutputFile, false);
 
             return await RunAsync();

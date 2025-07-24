@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Core.Models
 {
-    class PreviewModel
+   public class PreviewModel
     {
+        public string InputFile { get; set; }
+        public string OutputFile { get; set; }
+        public string Timestamp { get; set; } = "00:00:05";
     }
 }

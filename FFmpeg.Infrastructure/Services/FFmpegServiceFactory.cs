@@ -42,5 +42,10 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<PreviewModel> CreatePreviewCommand()
+        {
+            return new PreviewCommand(_executor, _commandBuilder);
+        }
     }
 }

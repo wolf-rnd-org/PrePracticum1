@@ -1,0 +1,136 @@
+Folder PATH listing
+Volume serial number is 0220-A536
+C:.
+|   .gitignore
+|   Ffmpeg.sln
+|   structure.txt
+|   
++---.github
+|   \---workflows
++---Ffmpeg.API
+|   |   appsettings.Development.json
+|   |   appsettings.json
+|   |   FFmpeg.API.csproj
+|   |   FFmpeg.API.csproj.user
+|   |   Helper.cs
+|   |   Program.cs
+|   |   
+|   +---bin
+|   |   \---Debug
+|   |       \---net9.0
+|   +---DTOs
+|   |       BorderDto.cs
+|   |       ConvertAudioDto.cs
+|   |       FadeEffectDto.cs
+|   |       WatermarkDto.cs
+|   |       
+|   +---Endpoints
+|   |       VideoEndpoints.cs
+|   |       
+|   +---obj
+|   |   |   FFmpeg.API.csproj.nuget.dgspec.json
+|   |   |   FFmpeg.API.csproj.nuget.g.props
+|   |   |   FFmpeg.API.csproj.nuget.g.targets
+|   |   |   project.assets.json
+|   |   |   project.nuget.cache
+|   |   |   
+|   |   \---Debug
+|   |       \---net9.0
+|   |           |   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+|   |           |   FFmpeg.API.AssemblyInfo.cs
+|   |           |   FFmpeg.API.AssemblyInfoInputs.cache
+|   |           |   FFmpeg.API.assets.cache
+|   |           |   FFmpeg.API.csproj.AssemblyReference.cache
+|   |           |   FFmpeg.API.GeneratedMSBuildEditorConfig.editorconfig
+|   |           |   FFmpeg.API.GlobalUsings.g.cs
+|   |           |   rpswa.dswa.cache.json
+|   |           |   staticwebassets.removed.txt
+|   |           |   
+|   |           +---ref
+|   |           +---refint
+|   |           \---staticwebassets
+|   \---Properties
+|           launchSettings.json
+|           
++---FFmpeg.Core
+|   |   FFmpeg.Core.csproj
+|   |   
+|   +---bin
+|   |   \---Debug
+|   |       \---net9.0
+|   +---Interfaces
+|   |       IFileService.cs
+|   |       ILogger.cs
+|   |       
+|   +---Models
+|   |       BorderModel.cs
+|   |       ConvertAudioModel.cs
+|   |       FadeEffectModel.cs
+|   |       GreenScreenModel.cs
+|   |       WatermarkModel.cs
+|   |       
+|   \---obj
+|       |   FFmpeg.Core.csproj.nuget.dgspec.json
+|       |   FFmpeg.Core.csproj.nuget.g.props
+|       |   FFmpeg.Core.csproj.nuget.g.targets
+|       |   project.assets.json
+|       |   project.nuget.cache
+|       |   
+|       \---Debug
+|           \---net9.0
+|               |   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+|               |   FFmpeg.Core.AssemblyInfo.cs
+|               |   FFmpeg.Core.AssemblyInfoInputs.cache
+|               |   FFmpeg.Core.assets.cache
+|               |   FFmpeg.Core.csproj.AssemblyReference.cache
+|               |   FFmpeg.Core.GeneratedMSBuildEditorConfig.editorconfig
+|               |   FFmpeg.Core.GlobalUsings.g.cs
+|               |   
+|               +---ref
+|               \---refint
+\---FFmpeg.Infrastructure
+    |   FFmpeg.Infrastructure.csproj
+    |   
+    +---bin
+    |   \---Debug
+    |       \---net9.0
+    +---Commands
+    |       BaseCommand.cs
+    |       BorderCommand.cs
+    |       CommandBuilder.cs
+    |       CommandResult.cs
+    |       ConvertAudioCommand.cs
+    |       FadeEffectCommand.cs
+    |       ICommand.cs
+    |       ICommandBuilder.cs
+    |       WatermarkCommand.cs
+    |       
+    +---External
+    |       ffmpeg.exe
+    |       LICENSE
+    |       README.txt
+    |       
+    +---obj
+    |   |   FFmpeg.Infrastructure.csproj.nuget.dgspec.json
+    |   |   FFmpeg.Infrastructure.csproj.nuget.g.props
+    |   |   FFmpeg.Infrastructure.csproj.nuget.g.targets
+    |   |   project.assets.json
+    |   |   project.nuget.cache
+    |   |   
+    |   \---Debug
+    |       \---net9.0
+    |           |   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+    |           |   FFmpeg.Infrastructure.AssemblyInfo.cs
+    |           |   FFmpeg.Infrastructure.AssemblyInfoInputs.cache
+    |           |   FFmpeg.Infrastructure.assets.cache
+    |           |   FFmpeg.Infrastructure.csproj.AssemblyReference.cache
+    |           |   FFmpeg.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+    |           |   FFmpeg.Infrastructure.GlobalUsings.g.cs
+    |           |   
+    |           +---ref
+    |           \---refint
+    \---Services
+            FfmpegExecutor.cs
+            FFmpegServiceFactory.cs
+            FileService.cs
+            

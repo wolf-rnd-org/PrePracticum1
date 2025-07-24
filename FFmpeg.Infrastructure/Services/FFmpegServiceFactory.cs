@@ -15,6 +15,8 @@ namespace FFmpeg.Infrastructure.Services
     {
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<BorderModel> CreateBorderCommand();
+        ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand(); 
+
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -41,6 +43,10 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);
+        }
+        public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
+        {
+            return new TimestampOverlayCommand(_executor, _commandBuilder);
         }
     }
 }

@@ -20,14 +20,18 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/watermark", AddWatermark)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
-          
+
             app.MapPost("/api/video/border", AddBorder)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600));
 
-          app.MapPost("/api/audio/convert", ConvertAudio)
-            .DisableAntiforgery()
-          .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+            app.MapPost("/api/audio/convert", ConvertAudio)
+              .DisableAntiforgery()
+            .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+
+            app.MapPost("/api/video/thumbnail", CreateThumbnail)
+               .DisableAntiforgery()
+               .WithMetadata(new RequestSizeLimitAttribute(104857600));
         }
 
         private static async Task<IResult> AddWatermark(
@@ -170,47 +174,100 @@ namespace FFmpeg.API.Endpoints
         private static async Task<IResult> ConvertAudio(
     HttpContext context,
     [FromForm] ConvertAudioDto dto)
-{
-    var fileService = context.RequestServices.GetRequiredService<IFileService>();
-    var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
-    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-
-    if (dto.AudioFile == null || string.IsNullOrWhiteSpace(dto.OutputFormat))
-    {
-        return Results.BadRequest("Audio file and output format are required");
-    }
-
-    string inputFileName = await fileService.SaveUploadedFileAsync(dto.AudioFile);
-    string extension = "." + dto.OutputFormat.Trim().ToLower();
-    string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-    List<string> filesToCleanup = new() { inputFileName, outputFileName };
-
-    try
-    {
-        var command = ffmpegService.CreateConvertAudioCommand();
-        var result = await command.ExecuteAsync(new ConvertAudioModel
         {
-            InputFile = inputFileName,
-            OutputFile = outputFileName
-        });
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
-        if (!result.IsSuccess)
-        {
-            logger.LogError("FFmpeg audio convert failed: {Error}", result.ErrorMessage);
-            return Results.Problem("Conversion failed: " + result.ErrorMessage);
+            if (dto.AudioFile == null || string.IsNullOrWhiteSpace(dto.OutputFormat))
+            {
+                return Results.BadRequest("Audio file and output format are required");
+            }
+
+            string inputFileName = await fileService.SaveUploadedFileAsync(dto.AudioFile);
+            string extension = "." + dto.OutputFormat.Trim().ToLower();
+            string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+            List<string> filesToCleanup = new() { inputFileName, outputFileName };
+
+            try
+            {
+                var command = ffmpegService.CreateConvertAudioCommand();
+                var result = await command.ExecuteAsync(new ConvertAudioModel
+                {
+                    InputFile = inputFileName,
+                    OutputFile = outputFileName
+                });
+
+                if (!result.IsSuccess)
+                {
+                    logger.LogError("FFmpeg audio convert failed: {Error}", result.ErrorMessage);
+                    return Results.Problem("Conversion failed: " + result.ErrorMessage);
+                }
+
+                var fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                return Results.File(fileBytes, "application/octet-stream", Path.GetFileName(outputFileName));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error converting audio");
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
         }
+        private static async Task<IResult> CreatePreview(
+           HttpContext context,
+           [FromForm] PreviewDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
-        var fileBytes = await fileService.GetOutputFileAsync(outputFileName);
-        _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-        return Results.File(fileBytes, "application/octet-stream", Path.GetFileName(outputFileName));
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error converting audio");
-        _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-        return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
-    }
-}
+            try
+            {
+                // Validate request
+                if (dto.VideoFile == null)
+                {
+                    return Results.BadRequest("Video file is required");
+                }
+
+                // Save uploaded file
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+
+                // Generate output filename
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(".jpg");
+
+                // Create and execute the thumbnail command
+                var command = ffmpegService.CreatePreview();
+                var result = await command.ExecuteAsync(new PreviewModel
+                {
+                    InputFile = videoFileName,
+                    OutputFile = outputFileName,
+                    Timestamp = dto.Timestamp 
+                });
+
+                if (!result.IsSuccess)
+                {
+                    logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                        result.ErrorMessage, result.CommandExecuted);
+                    return Results.Problem("Failed to create thumbnail: " + result.ErrorMessage, statusCode: 500);
+                }
+
+                // Read the output file
+                byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+
+                // Clean up temporary files
+                _ = fileService.CleanupTempFilesAsync(new List<string> { videoFileName, outputFileName });
+
+                // Return the file
+                return Results.File(fileBytes, "image/jpeg", outputFileName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in CreateThumbnail endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
 
     }
 }

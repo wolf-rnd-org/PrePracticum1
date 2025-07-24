@@ -17,7 +17,6 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
     }
 
-
     public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         private readonly FFmpegExecutor _executor;

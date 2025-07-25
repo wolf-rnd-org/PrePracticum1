@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Infrastructure.Commands
 {
-    public class ChangeBrightnessAndContrastCommand:BaseCommand, ICommand<ChangeBrightnessAndContrastModel>
+    public class ChangeBrightnessAndContrastCommand : BaseCommand, ICommand<ChangeBrightnessAndContrastModel>
     {
         private readonly ICommandBuilder _commandBuilder;
 
-        public ChangeBrightnessAndContrastCommand(ICommandBuilder commandBuilder, FFmpegExecutor executor):base(executor)
+        public ChangeBrightnessAndContrastCommand(ICommandBuilder commandBuilder, FFmpegExecutor executor) : base(executor)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
 
@@ -22,8 +22,8 @@ namespace FFmpeg.Infrastructure.Commands
 
         public async Task<CommandResult> ExecuteAsync(ChangeBrightnessAndContrastModel model)
         {
-            if (model.Brightness < -1 || model.Brightness > 1)
-                throw new ArgumentOutOfRangeException(nameof(model.Brightness), "Brightness must be between -1.0 and 1.0");
+            if (model.Brightness < -1 || model.Brightness > 1) // גדול מאפס 
+                throw new ArgumentOutOfRangeException(nameof(model.Brightness), "Brightness must be between -1.0 and 1.0");// בין 1- ל1
 
             if (model.Contrast <= 0)
                 throw new ArgumentOutOfRangeException(nameof(model.Contrast), "Contrast must be greater than 0");
@@ -31,8 +31,8 @@ namespace FFmpeg.Infrastructure.Commands
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputVideoPath)
                 .AddOption($"-vf eq=brightness={model.Brightness}:contrast={model.Contrast}")
-                .AddOption($"-map 0:a?") 
-                .AddOption($"-c:a copy") 
+                .AddOption($"-map 0") // למפות את כל הזרמים (וידאו + שמע)
+                .AddOption($"-c:a copy")
                 .SetOutput(model.OutputVideoPath);
 
             return await RunAsync();

@@ -15,6 +15,7 @@ namespace FFmpeg.Infrastructure.Services
     {
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<BorderModel> CreateBorderCommand();
+        ICommand<ChangeBrightnessAndContrastModel> CreateChangeBrightnessAndContrastCommand();
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -41,6 +42,11 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);
+        }
+
+        public ICommand<ChangeBrightnessAndContrastModel> CreateChangeBrightnessAndContrastCommand()
+        {
+            return new ChangeBrightnessAndContrastCommand(_commandBuilder, _executor);
         }
     }
 }

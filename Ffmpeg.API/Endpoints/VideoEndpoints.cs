@@ -21,7 +21,9 @@ namespace FFmpeg.API.Endpoints
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
 
-
+            app.MapPost("api/video/change-brightness-contrast", ChangeBrightnessAndContrast)
+                      .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
 
             //app.MapPost("/api/video/border", AddBorder)
             //    .DisableAntiforgery()
@@ -214,5 +216,62 @@ namespace FFmpeg.API.Endpoints
         //    }
         //}
 
+        public static async Task<IResult> ChangeBrightnessAndContrast(
+            HttpContext context,
+            [FromForm] ChangeBrightnessAndContrastDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                if (dto.SourceFile == null || string.IsNullOrWhiteSpace(dto.OutputFileName))
+                {
+                    return Results.BadRequest("Input video file and output video file are required");
+                }
+                string inputFileName = await fileService.SaveUploadedFileAsync(dto.SourceFile);
+
+                // בדיקה שנגמר ב .mp4
+                if (!dto.OutputFileName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase))
+                {
+                    dto.OutputFileName = Path.ChangeExtension(dto.OutputFileName, ".mp4");
+                }
+
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(dto.OutputFileName);
+                List<string> filesToCleanup = new() { inputFileName, outputFileName };
+                try
+                {
+                    var command = ffmpegService.CreateChangeBrightnessAndContrastCommand();
+                    var result = await command.ExecuteAsync(new ChangeBrightnessAndContrastModel
+                    {
+                        InputVideoPath = inputFileName,
+                        OutputVideoPath = outputFileName,
+                        Brightness = dto.Brightness,
+                        Contrast = dto.Contrast
+                    });
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to change brightness and contrast: " + result.ErrorMessage, statusCode: 500);
+                    }
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    return Results.File(fileBytes, "video/mp4", Path.GetFileName(outputFileName));
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing brightness and contrast request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ChangeBrightnessAndContrast endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
     }
 }

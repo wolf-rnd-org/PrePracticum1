@@ -10,23 +10,23 @@ namespace FFmpeg.Infrastructure.Commands
 {
 
 
-    public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
-    {
-        private readonly ICommandBuilder _commandBuilder;
+    //public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
+    //{
+    //    private readonly ICommandBuilder _commandBuilder;
 
-        public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
-            : base(executor)
-        {
-            _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
-        }
+    //    public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+    //        : base(executor)
+    //    {
+    //        _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
+    //    }
 
-        public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
-        {
-            CommandBuilder = _commandBuilder
-                .SetInput(model.InputFile)
-                .SetOutput(model.OutputFile, true);
+    //    public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
+    //    {
+    //        CommandBuilder = _commandBuilder
+    //            .SetInput(model.InputFile)
+    //            .SetOutput(model.OutputFile, true);
 
-            return await RunAsync();
-        }
-    }
+    //        return await RunAsync();
+    //    }
+    //}
 }

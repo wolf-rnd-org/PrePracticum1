@@ -1,4 +1,3 @@
-using Ffmpeg.Command;
 using FFmpeg.API.Endpoints;
 using FFmpeg.Core.Interfaces;
 using FFmpeg.Infrastructure.Services;
@@ -30,12 +29,12 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 104857600; // 100 MB
 });
 
-builder.Services.AddSingleton<Ffmpeg.Command.ILogger, Logger>();
+builder.Services.AddSingleton<FFmpeg.Core.Interfaces.ILogger, Logger>();
 
 // Register FFmpeg Services
 builder.Services.AddScoped<IFFmpegServiceFactory>(provider =>
 {
-    var logger = provider.GetRequiredService<Ffmpeg.Command.ILogger>();
+    var logger = provider.GetRequiredService<FFmpeg.Core.Interfaces.ILogger>();
     return new FFmpegServiceFactory(builder.Configuration, logger);
 });
 

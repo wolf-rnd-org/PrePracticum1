@@ -1,4 +1,4 @@
-﻿using Ffmpeg.Command;
+﻿using FFmpeg.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

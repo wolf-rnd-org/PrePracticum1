@@ -36,13 +36,9 @@ namespace FFmpeg.API.Endpoints
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
             try
             {
-
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
-
-                // Generate output filename
                 string extension = Path.GetExtension(dto.VideoFile.FileName);
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-
                 List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
 
                 try
@@ -60,20 +56,14 @@ namespace FFmpeg.API.Endpoints
                             result.ErrorMessage, result.CommandExecuted);
                         return Results.Problem("Failed to reverse file: " + result.ErrorMessage, statusCode: 500);
                     }
-
-                    // Read the output file
                     byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
-
-                    // Clean up temporary files
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
 
-                    // Return the file
                     return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error reversing video");
-                    // Clean up on error
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
                     throw;
                 }
@@ -84,9 +74,7 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
 
-
-
-}
+        }
 
         private static async Task<IResult> AddWatermark(
             HttpContext context,
@@ -103,8 +91,6 @@ namespace FFmpeg.API.Endpoints
                 {
                     return Results.BadRequest("Video file and watermark file are required");
                 }
-
-                // Save uploaded files
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
 

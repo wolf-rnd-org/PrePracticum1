@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Ffmpeg.Command.Commands;
+using FFmpeg.Infrastructure.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +8,25 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Infrastructure.Commands
 {
-    public class ExtractFrameInput
+    public class ExtractFrameCommand : BaseCommand, ICommand<ExtractFrameModel>
     {
+        private readonly ICommandBuilder _commandBuilder;
+
+        public ExtractFrameCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+            : base(executor)
+        {
+            _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
+        }
+
+        public async Task<CommandResult> ExecuteAsync(ExtractFrameModel model)
+        {
+            CommandBuilder = _commandBuilder
+                .SetInput(model.InputFile)
+                .AddOption($"-ss {model.Time}")
+                .AddOption("-vframes 1")
+                .SetOutput(model.OutputImagePath, true); // true: no re-encode
+
+            return await RunAsync();
+        }
     }
 }

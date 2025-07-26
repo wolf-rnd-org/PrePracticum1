@@ -19,12 +19,11 @@ namespace FFmpeg.API.Endpoints
         {
             app.MapPost("/api/video/watermark", AddWatermark)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
-
+                .WithMetadata(new RequestSizeLimitAttribute(104857600)); 
 
             app.MapPost("/api/video/reverse", ReverseVideo)
                .DisableAntiforgery()
-               .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+               .WithMetadata(new RequestSizeLimitAttribute(104857600)); 
         }
 
         private static async Task<IResult> ReverseVideo(
@@ -73,7 +72,6 @@ namespace FFmpeg.API.Endpoints
                 logger.LogError(ex, "Error in reverseVideo endpoint");
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
-
         }
 
         private static async Task<IResult> AddWatermark(

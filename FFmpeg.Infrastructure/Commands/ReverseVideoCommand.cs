@@ -26,7 +26,6 @@ namespace FFmpeg.Infrastructure.Commands
                   .SetInput(model.InputFile)
                   .AddOption($"-vf reverse")
                   .SetOutput(model.OutputFile);
-
             return await RunAsync();
         }
 

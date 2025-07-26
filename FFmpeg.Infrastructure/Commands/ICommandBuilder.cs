@@ -22,4 +22,7 @@ namespace FFmpeg.Infrastructure.Commands
         ICommandBuilder SetScale(int width, int height);
         string Build();
     }
+
 }
+
+

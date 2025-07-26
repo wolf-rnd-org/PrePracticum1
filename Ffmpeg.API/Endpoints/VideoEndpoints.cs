@@ -114,7 +114,6 @@ namespace FFmpeg.API.Endpoints
                 string backgroundFileName = await fileService.SaveUploadedFileAsync(dto.BackgroundFile);
                 string extension = Path.GetExtension(dto.VideoFile.FileName);
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-
                 var filesToCleanup = new List<string> { videoFileName, backgroundFileName, outputFileName };
 
                 try

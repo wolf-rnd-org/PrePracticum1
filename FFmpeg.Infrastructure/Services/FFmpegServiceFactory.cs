@@ -16,6 +16,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+        object CreateChangeResolutionCommand();
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -51,6 +52,11 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);
+        }
+
+        public object CreateChangeResolutionCommand()
+        {
+            return new ChangeResolutionCommand(_executor, _commandBuilder);
         }
     }
 }

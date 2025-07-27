@@ -9,22 +9,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
         ICommand<WatermarkModel> CreateWatermarkCommand();
+        ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
-    }
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();  
+        ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand();
 
+
+    }
+        
     public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         private readonly FFmpegExecutor _executor;
         private readonly ICommandBuilder _commandBuilder;
 
-        public FFmpegServiceFactory(IConfiguration configuration, ILogger logger = null)
+        public FFmpegServiceFactory(IConfiguration configuration, ILogger? logger = null)
         {
+
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string ffmpegPath = Path.Combine(baseDirectory, "external", "ffmpeg.exe");
 
@@ -38,6 +45,7 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new WatermarkCommand(_executor, _commandBuilder);
         }
+
         public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
         {
             return new ReverseVideoCommand(_executor, _commandBuilder);
@@ -47,10 +55,21 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new GreenScreenCommand(_executor, _commandBuilder);
         }
-        
+
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+
+       
+        public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+        {
+            return new ConvertAudioCommand(_executor, _commandBuilder);
+        }
+        public ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand()
+        {
+            return new ConvertVideoToGifCommand(_executor, _commandBuilder);
+        }
+
     }
 }

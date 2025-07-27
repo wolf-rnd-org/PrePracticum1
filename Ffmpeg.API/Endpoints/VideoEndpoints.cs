@@ -219,7 +219,7 @@ namespace FFmpeg.API.Endpoints
 
         private static async Task<IResult> CreatePreview(
             HttpContext context,
-            [FromForm] ThumbnailDto dto)
+            [FromForm] PreviewDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
@@ -240,8 +240,8 @@ namespace FFmpeg.API.Endpoints
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(".jpg");
 
                 // Create and execute the thumbnail command
-                var command = ffmpegService.CreateThumbnailCommand();
-                var result = await command.ExecuteAsync(new ThumbnailModel
+                var command = ffmpegService.CreatePreviewCommand();
+                var result = await command.ExecuteAsync(new PreviewModel
                 {
                     InputFile = videoFileName,
                     OutputFile = outputFileName,

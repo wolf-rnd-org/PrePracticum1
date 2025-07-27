@@ -13,10 +13,11 @@ namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
-        ICommand<BorderModel> CreateBorderCommand();
-
 
         ICommand<WatermarkModel> CreateWatermarkCommand();
+        ICommand<GreenScreenModel> CreateGreenScreenCommand();
+        ICommand<BorderModel> CreateBorderCommand();
+
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
 
     }
@@ -46,7 +47,16 @@ namespace FFmpeg.Infrastructure.Services
             return new FadeEffectCommand(_executor, _commandBuilder);
         }
 
+        public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
+        {
+            return new ReverseVideoCommand(_executor, _commandBuilder);
+        }
 
+        public ICommand<GreenScreenModel> CreateGreenScreenCommand()
+        {
+            return new GreenScreenCommand(_executor, _commandBuilder);
+        }
+        
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);

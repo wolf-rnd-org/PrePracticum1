@@ -52,5 +52,9 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+        public ICommand<SubtitleTanslationModel> CreateSubtitleCommand()
+        {
+            return new SubtitleTranslationCommand(_executor, _commandBuilder);
+        }
     }
 }

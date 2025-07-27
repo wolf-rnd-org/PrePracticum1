@@ -5,25 +5,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FFmpeg.Core.Models;
+
 namespace FFmpeg.Infrastructure.Commands
 {
-    public class ExtractFrameCommand : BaseCommand, ICommand<ExtractFrameInput>
+
+
+    public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
     {
         private readonly ICommandBuilder _commandBuilder;
 
-        public ExtractFrameCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+        public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
             : base(executor)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
         }
-        public async Task<CommandResult> ExecuteAsync(ExtractFrameInput model)
+
+        public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
         {
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
-                .AddOption($"-ss {model.TimeSpan}")
-                .AddOption("-vframes 1")
-                .SetOutput(model.OutputImagePath, true); // true: no re-encode
+                .SetOutput(model.OutputFile, true);
+
             return await RunAsync();
         }
     }

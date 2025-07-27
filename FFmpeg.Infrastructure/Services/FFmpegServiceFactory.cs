@@ -13,10 +13,12 @@ namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
+        ICommand<BorderModel> CreateBorderCommand();
+
+
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
 
-        ICommand<BorderModel> CreateBorderCommand();
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory

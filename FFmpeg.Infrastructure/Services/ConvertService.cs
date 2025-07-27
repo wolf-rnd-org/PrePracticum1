@@ -46,7 +46,6 @@ namespace FFmpeg.Infrastructure.Services
                 using (var process = new Process { StartInfo = ffmpegStartInfo })
                 {
                     process.Start();
-
                     string stderr = await process.StandardError.ReadToEndAsync();
                     await process.WaitForExitAsync();
 
@@ -56,7 +55,6 @@ namespace FFmpeg.Infrastructure.Services
                         throw new InvalidOperationException($"Video conversion failed. Error: {stderr}");
                     }
                 }
-
                 resultBytes = await System.IO.File.ReadAllBytesAsync(outputPath);
             }
             catch (Exception ex)
@@ -75,7 +73,6 @@ namespace FFmpeg.Infrastructure.Services
                     System.IO.File.Delete(outputPath);
                 }
             }
-
             return resultBytes;
         }
     }

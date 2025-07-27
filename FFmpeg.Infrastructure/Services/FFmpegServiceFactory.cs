@@ -14,7 +14,9 @@ namespace FFmpeg.Infrastructure.Services
     public interface IFFmpegServiceFactory
     {
         ICommand<WatermarkModel> CreateWatermarkCommand();
+        ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+        ICommand<PreviewModel> CreatePreviewCommand();
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -37,7 +39,16 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new WatermarkCommand(_executor, _commandBuilder);
         }
+        public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
+        {
+            return new ReverseVideoCommand(_executor, _commandBuilder);
+        }
 
+        public ICommand<GreenScreenModel> CreateGreenScreenCommand()
+        {
+            return new GreenScreenCommand(_executor, _commandBuilder);
+        }
+        
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);

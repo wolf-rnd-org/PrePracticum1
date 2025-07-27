@@ -52,7 +52,6 @@ namespace FFmpeg.Infrastructure.Commands
 
                 _logger.LogInformation($"FFmpeg output: {output}");
                 Console.WriteLine($"FFmpeg error: {errorOutput}");
-                //_logger.LogError($"FFmpeg error: {errorOutput}");
 
                 return process.ExitCode == 0;
             }

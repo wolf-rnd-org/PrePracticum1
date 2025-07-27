@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Core.Models
 {
-    public class CutVideoModel
+    public class ReverseVideoModel
     {
-        public string InputFile { get; set; }
         public string OutputFile { get; set; }
-        public string StartTime { get; set; } 
-        public string EndTime { get; set; }   
+        public string InputFile { get; set; }
     }
 }

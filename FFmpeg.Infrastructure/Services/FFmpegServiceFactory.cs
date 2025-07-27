@@ -16,6 +16,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+        ICommand<RemoveAudioModel> CreateRemoveAudioCommand();
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -47,10 +48,15 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new GreenScreenCommand(_executor, _commandBuilder);
         }
-        
+
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+        public ICommand<RemoveAudioModel> CreateRemoveAudioCommand()
+        {
+            return new RemoveAudioCommand(_executor, _commandBuilder); // ✅ חדש
+        }
+
     }
 }

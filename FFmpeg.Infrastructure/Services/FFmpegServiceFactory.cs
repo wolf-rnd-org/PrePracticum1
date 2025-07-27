@@ -55,7 +55,7 @@ namespace FFmpeg.Infrastructure.Services
 
         public ICommand<RotateModel> RotationVideoCommand()
         {
-
+            return new RotateCommand(_executor, _commandBuilder);
         }
     }
 }

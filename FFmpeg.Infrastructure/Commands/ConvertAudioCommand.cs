@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Infrastructure.Commands
 {
-
-
     public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
     {
         private readonly ICommandBuilder _commandBuilder;

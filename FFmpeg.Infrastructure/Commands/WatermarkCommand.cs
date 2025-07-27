@@ -18,7 +18,7 @@ namespace Ffmpeg.Command.Commands
 
         public WatermarkCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
             : base(executor)
-        {   
+        {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
         }
 

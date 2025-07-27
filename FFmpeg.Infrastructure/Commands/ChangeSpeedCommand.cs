@@ -24,18 +24,13 @@ namespace FFmpeg.Infrastructure.Commands
             if (string.IsNullOrEmpty(model.OutputFile)) throw new ArgumentException("Output file required");
             if (model.Speed <= 0) throw new ArgumentException("Speed must be greater than 0");
 
-            // Calculate video speed filter
             double setptsValue = 1.0 / model.Speed;
             string videoFilter = $"setpts={setptsValue.ToString(CultureInfo.InvariantCulture)}*PTS";
 
-            // Calculate audio speed filter (atempo supports 0.5-2.0, for other values chain filters)
             string audioFilter;
             double speed = model.Speed;
             if (speed < 0.5 || speed > 2.0)
             {
-                // Chain atempo filters for speeds outside 0.5-2.0
-                // Example: speed=4 => atempo=2.0,atempo=2.0
-                // Example: speed=0.25 => atempo=0.5,atempo=0.5
                 int n = 0;
                 double s = speed;
                 string chain = "";

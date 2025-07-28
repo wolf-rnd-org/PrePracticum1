@@ -1,4 +1,4 @@
-ame: Build .NET API
+name: Build .NET API
 
 on:
   pull_request:

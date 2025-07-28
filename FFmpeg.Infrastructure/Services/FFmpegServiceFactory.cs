@@ -13,16 +13,22 @@ namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
-
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+<<<<<<< HEAD
 <<<<<<< HEAD
         ICommand<PreviewModel> CreatePreviewCommand();
 =======
 
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
 
+>>>>>>> master
+=======
+        ICommand<ReverseVideoModel> CreateReverseVideoCommand();
+        ICommand<AudioEffectModel> CreateAudioEffectCommand();
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
+        ICommand<FadeEffectModel> CreateFadeEffectCommand();
 >>>>>>> master
     }
 
@@ -65,10 +71,22 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+<<<<<<< HEAD
 
         public ICommand<PreviewModel> CreatePreviewCommand()
         {
             return new PreviewCommand(_executor, _commandBuilder);
+=======
+        
+        public ICommand<AudioEffectModel> CreateAudioEffectCommand()
+        {
+            return new AudioEffectCommand(_executor, _commandBuilder);
+        }
+        
+        public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+        {
+            return new ConvertAudioCommand(_executor, _commandBuilder);
+>>>>>>> master
         }
     }
 }

@@ -13,17 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug directory structure
+      - name: Clean duplicate directories
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
+          echo "Removing duplicate FFmpeg.API directory (empty one)"
+          rm -rf FFmpeg.API
+          echo "Directory contents after cleanup:"
           ls -la
-          echo "Looking for solution file:"
-          find . -name "*.sln" -type f
-          echo "FFmpeg.API directory contents:"
-          ls -la FFmpeg.API/ || echo "FFmpeg.API not found"
-          echo "Ffmpeg.API directory contents:"
-          ls -la Ffmpeg.API/ || echo "Ffmpeg.API not found"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -31,7 +26,7 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore --verbosity normal
+        run: dotnet restore
 
       - name: Build project
-        run: dotnet build --configuration Release --no-restore --verbosity normal
+        run: dotnet build --configuration Release --no-restore

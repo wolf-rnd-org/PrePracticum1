@@ -13,12 +13,13 @@ namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
-
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AnimatedTextModel> CreateAnimatedTextCommand();
+        ICommand<AudioEffectModel> CreateAudioEffectCommand();
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
     }
 
@@ -65,6 +66,16 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
         {
             return new AnimatedTextCommand(_executor, _commandBuilder);
+        }
+
+        public ICommand<AudioEffectModel> CreateAudioEffectCommand()
+        {
+            return new AudioEffectCommand(_executor, _commandBuilder);
+        }
+        
+        public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+        {
+            return new ConvertAudioCommand(_executor, _commandBuilder);
         }
     }
 }

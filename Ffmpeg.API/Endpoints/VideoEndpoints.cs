@@ -10,6 +10,7 @@ using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FFmpeg.API.Endpoints
 {
@@ -46,6 +47,10 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/audio/convert", ConvertAudio)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+
+            app.MapPost("/api/audio/effect", ApplyAudioEffect)
+                .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
         }
 
         private static async Task<IResult> ReverseVideo(
@@ -109,17 +114,7 @@ namespace FFmpeg.API.Endpoints
                 if (dto.VideoFile == null || dto.WatermarkFile == null) {
                     return Results.BadRequest("Video file and watermark file are required");
                 }
-<<<<<<< HEAD
-=======
 
-                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
-                string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
-
-                string extension = Path.GetExtension(dto.VideoFile.FileName);
-                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-
-                List<string> filesToCleanup = new() { videoFileName, watermarkFileName, outputFileName };
-                }
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
                 string extension = Path.GetExtension(dto.VideoFile.FileName);
@@ -159,51 +154,11 @@ namespace FFmpeg.API.Endpoints
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
                     throw;
                 }
->>>>>>> master
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in AddWatermark endpoint");
+                logger.LogError(ex, "Error in GreenScreen endpoint");
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
-            }
-            string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
-            string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
-            string extension = Path.GetExtension(dto.VideoFile.FileName);
-            string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-
-            var filesToCleanup = new List<string> { videoFileName, watermarkFileName, outputFileName };
-
-            try
-            {
-                var command = ffmpegService.CreateWatermarkCommand();
-                var result = await command.ExecuteAsync(new WatermarkModel
-                {
-                    InputFile = videoFileName,
-                    WatermarkFile = watermarkFileName,
-                    OutputFile = outputFileName,
-                    XPosition = dto.XPosition,
-                    YPosition = dto.YPosition,
-                    IsVideo = true,
-                    VideoCodec = "libx264"
-                });
-
-                if (!result.IsSuccess)
-                {
-                    logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
-                        result.ErrorMessage, result.CommandExecuted);
-                    return Results.Problem("Failed to add watermark: " + result.ErrorMessage, statusCode: 500);
-                }
-
-                byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
-                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-
-                return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error processing watermark request");
-                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-                throw;
             }
         }
 
@@ -420,25 +375,36 @@ namespace FFmpeg.API.Endpoints
                 byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
                 _ = fileService.CleanupTempFilesAsync(filesToCleanup);
 
+<<<<<<< HEAD
 >>>>>>> master
                 return Results.File(fileBytes, "application/octet-stream", Path.GetFileName(outputFileName));
+=======
+                return Results.File(fileBytes, "audio/" + dto.OutputFormat.Trim().ToLower(), dto.AudioFile.FileName);
+>>>>>>> master
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error converting audio");
+                logger.LogError(ex, "Error in ConvertAudio endpoint");
                 _ = fileService.CleanupTempFilesAsync(filesToCleanup);
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
 
+<<<<<<< HEAD
 
         private static async Task<IResult> AddAnimatedText(
                 HttpContext context,
                 [FromForm] AnimatedTextDto dto)
+=======
+        private static async Task<IResult> ApplyAudioEffect(
+            HttpContext context,
+            [FromForm] AudioEffectDto dto)
+>>>>>>> master
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+<<<<<<< HEAD
             try
             {
                 if (dto.VideoFile == null || dto.Content == null)
@@ -487,6 +453,61 @@ namespace FFmpeg.API.Endpoints
                 _ = fileService.CleanupTempFilesAsync(filesToCleanup);
                 throw;
             }
+=======
+
+            try
+            {
+                if (dto.VideoFile == null)
+                    return Results.BadRequest("Video file is required");
+
+                if (string.IsNullOrWhiteSpace(dto.EffectType))
+                    return Results.BadRequest("Effect type is required");
+
+                string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = string.IsNullOrWhiteSpace(dto.OutputFileName) 
+                    ? await fileService.GenerateUniqueFileNameAsync(extension)
+                    : dto.OutputFileName;
+                
+                List<string> filesToCleanup = new() { inputFileName, outputFileName };
+
+                try
+                {
+                    var command = ffmpegService.CreateAudioEffectCommand();
+                    var result = await command.ExecuteAsync(new AudioEffectModel
+                    {
+                        InputFile = inputFileName,
+                        OutputFile = outputFileName,
+                        EffectType = dto.EffectType,
+                        Duration = dto.Duration
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg audio effect failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to apply audio effect: " + result.ErrorMessage, statusCode: 500);
+                    }
+
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error applying audio effect");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ApplyAudioEffect endpoint");
+
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+>>>>>>> master
         }
     }
 }

@@ -134,6 +134,15 @@ namespace FFmpeg.Infrastructure.Commands
             return this;
         }
 
+        public ICommandBuilder SetAudioFilter(string filterExpression)
+        {
+            if (!string.IsNullOrEmpty(filterExpression))
+            {
+                _options.Add($"-af \"{filterExpression}\"");
+            }
+            return this;
+        }
+
         public string Build()
         {
             var command = new List<string>();

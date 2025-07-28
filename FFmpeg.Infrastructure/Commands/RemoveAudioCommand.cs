@@ -10,24 +10,27 @@ using System.Threading.Tasks;
 namespace FFmpeg.Infrastructure.Commands
 {
 
-
-    public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
+    public class RemoveAudioCommand : BaseCommand, ICommand<RemoveAudioModel>
     {
         private readonly ICommandBuilder _commandBuilder;
 
-        public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+        public RemoveAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
             : base(executor)
         {
-            _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
+            _commandBuilder = commandBuilder;
         }
 
-        public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
+        public async Task<CommandResult> ExecuteAsync(RemoveAudioModel model)
         {
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
-                .SetOutput(model.OutputFile, true);
+                .AddOption("-an") // remove audio
+                .SetOutput(model.OutputFile);
 
             return await RunAsync();
         }
     }
 }
+
+
+

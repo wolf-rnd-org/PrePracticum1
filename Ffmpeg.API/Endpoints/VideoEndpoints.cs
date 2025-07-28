@@ -282,19 +282,14 @@ namespace FFmpeg.API.Endpoints
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        
+
             try
             {
                 if (dto.VideoFile == null || dto.VideoFile.Length == 0)
                     return Results.BadRequest("Video file is required");
-        
+
                 if (string.IsNullOrWhiteSpace(dto.FrameColor))
                     dto.FrameColor = "blue";
-        
-                int borderSize;
-                if (!int.TryParse(dto.BorderSize, out borderSize) || borderSize <= 0)
-                    borderSize = 20;
-        
 
                 int borderSize = int.TryParse(dto.BorderSize, out var parsed) && parsed > 0 ? parsed : 20;
 
@@ -303,32 +298,6 @@ namespace FFmpeg.API.Endpoints
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
 
                 List<string> filesToCleanup = new() { inputFileName, outputFileName };
-        
-                try
-                {
-                    var command = ffmpegService.CreateBorderCommand();
-                    var result = await command.ExecuteAsync(new BorderModel
-                    {
-                        InputFile = inputFileName,
-                        OutputFile = outputFileName,
-                        BorderSize = borderSize,
-                        FrameColor = dto.FrameColor,
-                        IsVideo = true,
-                        VideoCodec = "libx264"
-                    });
-        
-                    if (!result.IsSuccess)
-                    {
-                        logger.LogError("FFmpeg BorderCommand failed: {ErrorMessage}, Command: {Command}",
-                            result.ErrorMessage, result.CommandExecuted);
-                        return Results.Problem("Failed to add border: " + result.ErrorMessage, statusCode: 500);
-                    }
-        
-                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
-                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
-                }
-                catch (Exception ex)
 
                 var command = ffmpegService.CreateBorderCommand();
                 var result = await command.ExecuteAsync(new BorderModel
@@ -359,7 +328,7 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-        
+
         private static async Task<IResult> ConvertAudio(
             HttpContext context,
             [FromForm] ConvertAudioDto dto)

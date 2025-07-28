@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Infrastructure.Commands
 {
-    internal class ReverseVideoCommand : BaseCommand, ICommand<ReverseVideoModel>
+    public class ReverseVideoCommand : BaseCommand, ICommand<ReverseVideoModel>
     {
         private readonly ICommandBuilder _commandBuilder;
 

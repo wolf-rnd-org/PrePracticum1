@@ -16,7 +16,14 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+<<<<<<< HEAD
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
+=======
+        ICommand<ReverseVideoModel> CreateReverseVideoCommand();
+        ICommand<AudioEffectModel> CreateAudioEffectCommand();
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
+        ICommand<FadeEffectModel> CreateFadeEffectCommand();
+>>>>>>> db3294dbb91faa8b297a7d7fa6d892cf4a0f6282
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -39,6 +46,11 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new WatermarkCommand(_executor, _commandBuilder);
         }
+        public ICommand<FadeEffectModel> CreateFadeEffectCommand()
+        {
+            return new FadeEffectCommand(_executor, _commandBuilder);
+        }
+
         public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
         {
             return new ReverseVideoCommand(_executor, _commandBuilder);
@@ -53,10 +65,22 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+<<<<<<< HEAD
 
         public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
         {
             return new MergeTwoFilesCommand(_executor, _commandBuilder);
+=======
+        
+        public ICommand<AudioEffectModel> CreateAudioEffectCommand()
+        {
+            return new AudioEffectCommand(_executor, _commandBuilder);
+        }
+        
+        public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+        {
+            return new ConvertAudioCommand(_executor, _commandBuilder);
+>>>>>>> db3294dbb91faa8b297a7d7fa6d892cf4a0f6282
         }
     }
 }

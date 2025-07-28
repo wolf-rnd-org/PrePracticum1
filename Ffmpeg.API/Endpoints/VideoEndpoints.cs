@@ -111,13 +111,7 @@ namespace FFmpeg.API.Endpoints
                     return Results.BadRequest("Video file and watermark file are required");<<<<<<< feature/add-audio-effects
 
 
-                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
-                string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
-
-                string extension = Path.GetExtension(dto.VideoFile.FileName);
-                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
-
-                List<string> filesToCleanup = new() { videoFileName, watermarkFileName, outputFileName };
+         
                 }
 
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);

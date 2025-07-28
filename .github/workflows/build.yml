@@ -13,6 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Looking for solution file:"
+          find . -name "*.sln" -type f
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:

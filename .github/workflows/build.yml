@@ -20,6 +20,10 @@ jobs:
           ls -la
           echo "Looking for solution file:"
           find . -name "*.sln" -type f
+          echo "FFmpeg.API directory contents:"
+          ls -la FFmpeg.API/ || echo "FFmpeg.API not found"
+          echo "Ffmpeg.API directory contents:"
+          ls -la Ffmpeg.API/ || echo "Ffmpeg.API not found"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

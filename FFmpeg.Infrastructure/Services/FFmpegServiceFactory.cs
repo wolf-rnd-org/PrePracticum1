@@ -16,7 +16,14 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+<<<<<<< HEAD
         ICommand<CropModel> CreateCropCommand();
+=======
+        ICommand<ReverseVideoModel> CreateReverseVideoCommand();
+        ICommand<AudioEffectModel> CreateAudioEffectCommand();
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
+        ICommand<FadeEffectModel> CreateFadeEffectCommand();
+>>>>>>> origin/master
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -39,6 +46,11 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new WatermarkCommand(_executor, _commandBuilder);
         }
+        public ICommand<FadeEffectModel> CreateFadeEffectCommand()
+        {
+            return new FadeEffectCommand(_executor, _commandBuilder);
+        }
+
         public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
         {
             return new ReverseVideoCommand(_executor, _commandBuilder);
@@ -53,9 +65,21 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+<<<<<<< HEAD
         public ICommand<CropModel> CreateCropCommand()
         {
             return new CropCommand(_executor, _commandBuilder);
+=======
+        
+        public ICommand<AudioEffectModel> CreateAudioEffectCommand()
+        {
+            return new AudioEffectCommand(_executor, _commandBuilder);
+        }
+        
+        public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+        {
+            return new ConvertAudioCommand(_executor, _commandBuilder);
+>>>>>>> origin/master
         }
     }
 }

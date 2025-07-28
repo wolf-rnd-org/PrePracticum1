@@ -9,8 +9,8 @@ namespace FFmpeg.Core.Models
     public class ConvertAudioModel
     
     {
-        public string InputFile { get; set; }
-        public string OutputFile { get; set; }
+        public string InputFile { get; set; } = string.Empty;
+        public string OutputFile { get; set; } = string.Empty;
     }
 
 }

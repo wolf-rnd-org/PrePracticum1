@@ -332,8 +332,6 @@ namespace FFmpeg.API.Endpoints
             {
                 return Results.BadRequest("Audio file and output format are required");
             }
-                return Results.BadRequest("Audio file and output format are required");
-
             string inputFileName = await fileService.SaveUploadedFileAsync(dto.AudioFile);
             string extension = "." + dto.OutputFormat.Trim().ToLower();
             string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);

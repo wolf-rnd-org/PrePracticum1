@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Core.Models
 {
-    internal class ConvertAudioModel
+    public class ConvertAudioModel
     
     {
         public string InputFile { get; set; }

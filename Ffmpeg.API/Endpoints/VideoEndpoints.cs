@@ -10,6 +10,7 @@ using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FFmpeg.API.Endpoints
 {
@@ -25,6 +26,11 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
                 .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+                //.WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+
+            app.MapPost("/api/video/fadein", AddFadeInEffect)
+                .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize))
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
 
@@ -39,6 +45,10 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/audio/convert", ConvertAudio)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+
+            app.MapPost("/api/audio/effect", ApplyAudioEffect)
+                .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
 
             app.MapPost("api/video/chhange-resolution", ChangeResolution)
                 .DisableAntiforgery()
@@ -258,6 +268,61 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
+        private static async Task<IResult> AddFadeInEffect(
+            HttpContext context,
+            [FromForm] FadeEffectDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                if (dto.VideoFile == null)
+                    return Results.BadRequest("Video file is required");
+
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, await fileService.GenerateUniqueFileNameAsync(extension));
+
+                List<string> filesToCleanup = new() { videoFileName, outputFileName };
+
+                try
+                {
+                    var command = ffmpegService.CreateFadeEffectCommand();
+                    var result = await command.ExecuteAsync(new FadeEffectModel
+                    {
+                        InputFilePath = videoFileName,
+                        OutputFilePath = outputFileName,
+                        FadeInDurationSeconds = dto.FadeInDurationSeconds
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to add fade effect: " + result.ErrorMessage, statusCode: 500);
+                    }
+
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    return Results.File(fileBytes, "video/mp4", dto.OutputFileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing fade-in request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in AddFadeInEffect endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
         private static async Task<IResult> AddBorder(
             HttpContext context,
             [FromForm] BorderDto dto)
@@ -274,45 +339,36 @@ namespace FFmpeg.API.Endpoints
                 if (string.IsNullOrWhiteSpace(dto.FrameColor))
                     dto.FrameColor = "blue";
 
-                int borderSize;
-                if (!int.TryParse(dto.BorderSize, out borderSize) || borderSize <= 0)
-                    borderSize = 20;
+                int borderSize = int.TryParse(dto.BorderSize, out var parsed) && parsed > 0 ? parsed : 20;
 
                 string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string extension = Path.GetExtension(dto.VideoFile.FileName);
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+
                 List<string> filesToCleanup = new() { inputFileName, outputFileName };
 
-                try
+                var command = ffmpegService.CreateBorderCommand();
+                var result = await command.ExecuteAsync(new BorderModel
                 {
-                    var command = ffmpegService.CreateBorderCommand();
-                    var result = await command.ExecuteAsync(new BorderModel
-                    {
-                        InputFile = inputFileName,
-                        OutputFile = outputFileName,
-                        BorderSize = borderSize,
-                        FrameColor = dto.FrameColor,
-                        IsVideo = true,
-                        VideoCodec = "libx264"
-                    });
+                    InputFile = inputFileName,
+                    OutputFile = outputFileName,
+                    BorderSize = borderSize,
+                    FrameColor = dto.FrameColor,
+                    IsVideo = true,
+                    VideoCodec = "libx264"
+                });
 
-                    if (!result.IsSuccess)
-                    {
-                        logger.LogError("FFmpeg BorderCommand failed: {ErrorMessage}, Command: {Command}",
-                            result.ErrorMessage, result.CommandExecuted);
-                        return Results.Problem("Failed to add border: " + result.ErrorMessage, statusCode: 500);
-                    }
-
-                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
-                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
-                }
-                catch (Exception ex)
+                if (!result.IsSuccess)
                 {
-                    logger.LogError(ex, "Error processing border request");
-                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-                    throw;
+                    logger.LogError("FFmpeg BorderCommand failed: {ErrorMessage}, Command: {Command}",
+                        result.ErrorMessage, result.CommandExecuted);
+                    return Results.Problem("Failed to add border: " + result.ErrorMessage, statusCode: 500);
                 }
+
+                byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
             }
             catch (Exception ex)
             {
@@ -322,6 +378,12 @@ namespace FFmpeg.API.Endpoints
         }
 
         private static async Task<IResult> ConvertAudio(
+            HttpContext context,
+            [FromForm] ConvertAudioDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         HttpContext context,
         [FromForm] ConvertAudioDto dto)
         {
@@ -330,10 +392,17 @@ namespace FFmpeg.API.Endpoints
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
             if (dto.AudioFile == null || string.IsNullOrWhiteSpace(dto.OutputFormat))
+                return Results.BadRequest("Audio file and output format are required");
+            if (dto.AudioFile == null || string.IsNullOrWhiteSpace(dto.OutputFormat))
             {
                 return Results.BadRequest("Audio file and output format are required");
             }
 
+            string inputFileName = await fileService.SaveUploadedFileAsync(dto.AudioFile);
+            string extension = "." + dto.OutputFormat.Trim().ToLower();
+            string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+
+            List<string> filesToCleanup = new() { inputFileName, outputFileName };
             string inputFileName = await fileService.SaveUploadedFileAsync(dto.AudioFile);
             string extension = "." + dto.OutputFormat.Trim().ToLower();
             string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
@@ -354,6 +423,76 @@ namespace FFmpeg.API.Endpoints
                     return Results.Problem("Conversion failed: " + result.ErrorMessage);
                 }
 
+                byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                return Results.File(fileBytes, "audio/" + dto.OutputFormat.Trim().ToLower(), dto.AudioFile.FileName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ConvertAudio endpoint");
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
+        private static async Task<IResult> ApplyAudioEffect(
+            HttpContext context,
+            [FromForm] AudioEffectDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                if (dto.VideoFile == null)
+                    return Results.BadRequest("Video file is required");
+
+                if (string.IsNullOrWhiteSpace(dto.EffectType))
+                    return Results.BadRequest("Effect type is required");
+
+                string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = string.IsNullOrWhiteSpace(dto.OutputFileName) 
+                    ? await fileService.GenerateUniqueFileNameAsync(extension)
+                    : dto.OutputFileName;
+                
+                List<string> filesToCleanup = new() { inputFileName, outputFileName };
+
+                try
+                {
+                    var command = ffmpegService.CreateAudioEffectCommand();
+                    var result = await command.ExecuteAsync(new AudioEffectModel
+                    {
+                        InputFile = inputFileName,
+                        OutputFile = outputFileName,
+                        EffectType = dto.EffectType,
+                        Duration = dto.Duration
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg audio effect failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to apply audio effect: " + result.ErrorMessage, statusCode: 500);
+                    }
+
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error applying audio effect");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ApplyAudioEffect endpoint");
                 var fileBytes = await fileService.GetOutputFileAsync(outputFileName);
                 _ = fileService.CleanupTempFilesAsync(filesToCleanup);
                 return Results.File(fileBytes, "application/octet-stream", Path.GetFileName(outputFileName));
@@ -366,7 +505,8 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
     }
 }
-
-

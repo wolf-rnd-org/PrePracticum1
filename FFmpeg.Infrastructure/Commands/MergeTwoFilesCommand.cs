@@ -24,7 +24,7 @@ namespace FFmpeg.Infrastructure.Commands
             CommandBuilder = _commandBuilder
                 .SetInput(request.FirstInputFile)
                 .SetInput(request.SecondInputFile)
-                .AddFilterComplex($"[0:v][1:v]hstack=inputs=2")
+                .AddFilterComplex($"[0:v][1:v]hstack=inputs=2[out]")
                 .SetOutput(request.OutputFile);
 
             return await RunAsync();

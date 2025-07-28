@@ -51,15 +51,6 @@ builder.Services.AddScoped<ICommandBuilder, CommandBuilder>();
 builder.Services.AddScoped<AudioReplaceCommand>();
 
 var app = builder.Build();
-
-app.UseExceptionHandler("/error");  // טיפול גלובלי בשגיאות
-app.Map("/error", (HttpContext httpContext) =>
-{
-    var feature = httpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
-    var exception = feature?.Error;
-    return Results.Problem(title: exception?.Message, detail: exception?.StackTrace);
-});
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

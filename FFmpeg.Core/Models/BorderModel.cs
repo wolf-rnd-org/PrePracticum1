@@ -16,3 +16,4 @@ namespace FFmpeg.Core.Models
         public bool IsVideo { get; set; } = true;
     }
 }
+

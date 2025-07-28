@@ -26,7 +26,7 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore FFmpeg.API/FFmpeg.API.csproj
 
       - name: Build project
         run: dotnet build --configuration Release --no-restore

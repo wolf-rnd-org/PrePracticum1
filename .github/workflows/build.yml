@@ -19,7 +19,7 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore ./Ffmpeg.sln
+        run: dotnet restore --verbosity normal
 
       - name: Build project
-        run: dotnet build ./Ffmpeg.sln --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore --verbosity normal

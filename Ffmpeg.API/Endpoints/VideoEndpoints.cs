@@ -10,6 +10,7 @@ using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FFmpeg.API.Endpoints
 {
@@ -108,11 +109,7 @@ namespace FFmpeg.API.Endpoints
             try
             {
                 if (dto.VideoFile == null || dto.WatermarkFile == null)
-                    return Results.BadRequest("Video file and watermark file are required");<<<<<<< feature/add-audio-effects
-
-
-         
-                }
+                    return Results.BadRequest("Video file and watermark file are required");
 
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
@@ -361,6 +358,15 @@ namespace FFmpeg.API.Endpoints
                 byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
                 _ = fileService.CleanupTempFilesAsync(filesToCleanup);
 
+                return Results.File(fileBytes, "audio/" + dto.OutputFormat.Trim().ToLower(), dto.AudioFile.FileName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ConvertAudio endpoint");
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
 
         private static async Task<IResult> ApplyAudioEffect(
             HttpContext context,

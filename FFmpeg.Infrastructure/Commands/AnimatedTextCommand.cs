@@ -1,9 +1,11 @@
 ﻿using Ffmpeg.Command.Commands;
 using FFmpeg.Core.Models;
+using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,21 +21,18 @@ namespace FFmpeg.Infrastructure.Commands
 
         public async Task<CommandResult> ExecuteAsync(AnimatedTextModel model)
         {
+            string safeText = model.Content.Replace("'", @"\'");
             string xExpr = model.IsAnimated
-                ? $"w - mod(t*{model.AnimationSpeed}, w+text_w)"
+                ? $"'w - mod(t*{model.AnimationSpeed}\\, w+text_w)'"
                 : model.XPosition.ToString();
-            string drawTextFilter =
-                $"drawtext=text='{model.Content}':x={xExpr}:y={model.YPosition.ToString()}:fontsize={model.FontSize}:fontcolor={model.FontColor}";
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
-                .AddOption("-vf")
-                .AddFilterComplex(drawTextFilter);
-            if (model.IsVideo)
-            {
-                CommandBuilder
-                    .SetVideoCodec(model.VideoCodec);
-            }
-            CommandBuilder.SetOutput(model.OutputFile, model.IsVideo ? false : true);
+                .AddOption($"-vf \"drawtext=text='{safeText}':x={xExpr}:y={model.YPosition}:fontsize={model.FontSize}:fontcolor={model.FontColor}\"")
+                //.AddFilterComplex($"drawtext=text='{safeText}':x={xExpr}:y={model.YPosition.ToString()}:fontsize={model.FontSize}:fontcolor={model.FontColor}")
+                //.AddOption("-map \"[out]\"")
+                .SetVideoCodec(model.VideoCodec);
+            CommandBuilder.SetOutput(model.OutputFile, false);
+            Console.WriteLine(CommandBuilder.ToString());
             return await RunAsync();
         }
     }

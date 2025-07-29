@@ -406,8 +406,6 @@ namespace FFmpeg.API.Endpoints
                         YPosition = dto.YPosition,
                         FontSize = dto.FontSize,
                         FontColor = dto.FontColor ?? "white",
-                        IsVideo = true,
-                        VideoCodec = "libx264",
                         IsAnimated = dto.IsAnimated,
                         AnimationSpeed = dto.AnimationSpeed,
                     });
@@ -431,8 +429,7 @@ namespace FFmpeg.API.Endpoints
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in ApplyAudioEffect endpoint");
-
+                logger.LogError(ex, "Error in animatedtext endpoint");
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }

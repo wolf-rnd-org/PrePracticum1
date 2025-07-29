@@ -16,7 +16,6 @@ namespace FFmpeg.Core.Models
         public int FontSize { get; set; }
         public string FontColor { get; set; } = "white";
         public string VideoCodec { get; set; } = "libx264";
-        public bool IsVideo { get; set; } = true;
         public bool IsAnimated { get; set; } = false;
         public int AnimationSpeed { get; set; } = 100;
     }

@@ -28,11 +28,8 @@ namespace FFmpeg.Infrastructure.Commands
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
                 .AddOption($"-vf \"drawtext=text='{safeText}':x={xExpr}:y={model.YPosition}:fontsize={model.FontSize}:fontcolor={model.FontColor}\"")
-                //.AddFilterComplex($"drawtext=text='{safeText}':x={xExpr}:y={model.YPosition.ToString()}:fontsize={model.FontSize}:fontcolor={model.FontColor}")
-                //.AddOption("-map \"[out]\"")
                 .SetVideoCodec(model.VideoCodec);
             CommandBuilder.SetOutput(model.OutputFile, false);
-            Console.WriteLine(CommandBuilder.ToString());
             return await RunAsync();
         }
     }

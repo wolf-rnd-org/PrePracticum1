@@ -56,6 +56,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+//app.UseAntiforgery(); // десу лап
+
 app.MapEndpoints();
 
 app.MapGet("/", () => { return "FFmpeg API is running"; });

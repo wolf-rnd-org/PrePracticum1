@@ -19,7 +19,6 @@ namespace FFmpeg.API.Endpoints
         public static void MapEndpoints(this WebApplication app)
         {
             app.MapPost("/api/video/watermark", AddWatermark)
-                .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
@@ -36,13 +35,9 @@ namespace FFmpeg.API.Endpoints
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/reverse", ReverseVideo)
-<<<<<<< HEAD
-                .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-=======
+
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
->>>>>>> 457850d5413de974a50d13bd27a35ec69d17dfca
 
             app.MapPost("/api/video/border", AddBorder)
                 .DisableAntiforgery()
@@ -50,9 +45,7 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/audio/convert", ConvertAudio)
                 .DisableAntiforgery()
-<<<<<<< HEAD
-                .WithMetadata(new RequestSizeLimitAttribute(52428800));
-=======
+
                 .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
 
             app.MapPost("/api/video/change-speed", ChangeVideoSpeed)
@@ -62,7 +55,6 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/audio/effect", ApplyAudioEffect)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
->>>>>>> 457850d5413de974a50d13bd27a35ec69d17dfca
         }
 
         private static async Task<IResult> CutVideo(HttpContext context, [FromForm] CutVideoDto dto)
@@ -371,8 +363,6 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-<<<<<<< HEAD
-=======
 
         private static async Task<IResult> ChangeVideoSpeed(
             HttpContext context,
@@ -437,10 +427,10 @@ namespace FFmpeg.API.Endpoints
 
                 string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string extension = Path.GetExtension(dto.VideoFile.FileName);
-                string outputFileName = string.IsNullOrWhiteSpace(dto.OutputFileName) 
+                string outputFileName = string.IsNullOrWhiteSpace(dto.OutputFileName)
                     ? await fileService.GenerateUniqueFileNameAsync(extension)
                     : dto.OutputFileName;
-                
+
                 List<string> filesToCleanup = new() { inputFileName, outputFileName };
 
                 try
@@ -479,6 +469,5 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
->>>>>>> 457850d5413de974a50d13bd27a35ec69d17dfca
     }
 }

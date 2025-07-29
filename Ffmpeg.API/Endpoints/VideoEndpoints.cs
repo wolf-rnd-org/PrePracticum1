@@ -27,10 +27,7 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-<<<<<<< HEAD
-            //.WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
-=======
->>>>>>> 457850d5413de974a50d13bd27a35ec69d17dfca
+
 
             app.MapPost("/api/video/fadein", AddFadeInEffect)
                 .DisableAntiforgery()

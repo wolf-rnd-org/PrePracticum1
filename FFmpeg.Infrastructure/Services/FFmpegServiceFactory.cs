@@ -16,12 +16,10 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
-<<<<<<< HEAD
-
+        
         ICommand<CropModel> CreateCropCommand();
-=======
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
->>>>>>> 457850d5413de974a50d13bd27a35ec69d17dfca
+
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
@@ -68,19 +66,16 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
-<<<<<<< HEAD
         public ICommand<CropModel> CreateCropCommand()
         {
             return new CropCommand(_executor, _commandBuilder);
         }
 
-=======
 
         public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
         {
             return new ChangeSpeedCommand(_executor, _commandBuilder);
         }
->>>>>>> 457850d5413de974a50d13bd27a35ec69d17dfca
         
         public ICommand<AudioEffectModel> CreateAudioEffectCommand()
         {

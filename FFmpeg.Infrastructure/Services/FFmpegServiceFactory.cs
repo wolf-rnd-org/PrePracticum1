@@ -16,6 +16,8 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+        ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
+        ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
@@ -63,6 +65,16 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
+        {
+            return new TimestampOverlayCommand(_executor, _commandBuilder);
+        }
+
+        public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
+        {
+            return new ChangeSpeedCommand(_executor, _commandBuilder);
+        }
         
         public ICommand<AudioEffectModel> CreateAudioEffectCommand()
         {
@@ -72,6 +84,7 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
         {
             return new ConvertAudioCommand(_executor, _commandBuilder);
+
         }
         public ICommand<PreviewModel> CreatePreviewCommand()
         {

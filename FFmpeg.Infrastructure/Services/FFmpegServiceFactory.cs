@@ -2,6 +2,7 @@
 using Ffmpeg.Command.Commands;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
+using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -15,13 +16,21 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+
         ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
+
+
+        ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
 
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
+
+        ICommand<PreviewModel> CreatePreviewCommand();
+    }
+
 
     }
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -50,7 +59,6 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new FadeEffectCommand(_executor, _commandBuilder);
         }
-
         public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
         {
             return new ReverseVideoCommand(_executor, _commandBuilder);
@@ -65,21 +73,29 @@ namespace FFmpeg.Infrastructure.Services
         }
 
 
+
+        public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
+        {
+            return new TimestampOverlayCommand(_executor, _commandBuilder);
+        }
+
         public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
         {
             return new ChangeSpeedCommand(_executor, _commandBuilder);
         }
-        
         public ICommand<AudioEffectModel> CreateAudioEffectCommand()
         {
             return new AudioEffectCommand(_executor, _commandBuilder);
-        }
-        
+        } 
         public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
         {
             return new ConvertAudioCommand(_executor, _commandBuilder);
 
 
         }
+        public ICommand<PreviewModel> CreatePreviewCommand()
+        {
+            return new PreviewCommand(_executor, _commandBuilder);
+        }
     }
-}
+

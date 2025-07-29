@@ -2,13 +2,13 @@
 using Ffmpeg.Command.Commands;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
+using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
@@ -16,15 +16,23 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
+
+        ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
+
+
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
+
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
+
         ICommand<PreviewModel> CreatePreviewCommand();
     }
 
+
+    }
     public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         private readonly FFmpegExecutor _executor;
@@ -33,9 +41,7 @@ namespace FFmpeg.Infrastructure.Services
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string ffmpegPath = Path.Combine(baseDirectory, "external", "ffmpeg.exe");
-
             bool logOutput = bool.TryParse(configuration["FFmpeg:LogOutput"], out bool log) && log;
-
             _executor = new FFmpegExecutor(ffmpegPath, logOutput, logger);
             _commandBuilder = new CommandBuilder(configuration);
         }
@@ -43,6 +49,12 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new WatermarkCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
+        {
+            return new ExtractFrameCommand(_executor, _commandBuilder);
+        }
+
         public ICommand<FadeEffectModel> CreateFadeEffectCommand()
         {
             return new FadeEffectCommand(_executor, _commandBuilder);
@@ -59,10 +71,15 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+
+
+
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {
             return new TimestampOverlayCommand(_executor, _commandBuilder);
         }
+
+
         public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
         {
             return new ChangeSpeedCommand(_executor, _commandBuilder);
@@ -75,10 +92,11 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new ConvertAudioCommand(_executor, _commandBuilder);
 
+
         }
         public ICommand<PreviewModel> CreatePreviewCommand()
         {
             return new PreviewCommand(_executor, _commandBuilder);
         }
     }
-}
+

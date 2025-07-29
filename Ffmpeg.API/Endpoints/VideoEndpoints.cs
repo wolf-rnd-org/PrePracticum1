@@ -45,16 +45,13 @@ namespace FFmpeg.API.Endpoints
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
 
-<<<<<<< HEAD
             app.MapPost("/api/video/crop", CropVideo)
                  .DisableAntiforgery()
                  .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
-=======
             app.MapPost("/api/audio/effect", ApplyAudioEffect)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
->>>>>>> origin/master
         }
         private static async Task<IResult> CropVideo(HttpContext context, [FromForm] CropDto dto)
         {
@@ -166,8 +163,7 @@ namespace FFmpeg.API.Endpoints
             {
                 if (dto.VideoFile == null || dto.WatermarkFile == null)
                     return Results.BadRequest("Video file and watermark file are required");
-<<<<<<< HEAD
-=======
+
 
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
@@ -208,7 +204,6 @@ namespace FFmpeg.API.Endpoints
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
                     throw;
                 }
->>>>>>> origin/master
             }
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
             string watermarkFileName = await fileService.SaveUploadedFileAsync(dto.WatermarkFile);
@@ -257,7 +252,6 @@ namespace FFmpeg.API.Endpoints
             }
 }
 
-<<<<<<< HEAD
 private static async Task<IResult> ApplyGreenScreen(
     HttpContext context,
     [FromForm] GreenScreenDto dto)
@@ -399,7 +393,7 @@ HttpContext context,
     {
         var command = ffmpegService.CreateConvertAudioCommand();
         var result = await command.ExecuteAsync(new ConvertAudioModel
-=======
+
         private static async Task<IResult> ApplyGreenScreen(
             HttpContext context,
             [FromForm] GreenScreenDto dto)
@@ -568,7 +562,6 @@ HttpContext context,
         private static async Task<IResult> ConvertAudio(
             HttpContext context,
             [FromForm] ConvertAudioDto dto)
->>>>>>> origin/master
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();

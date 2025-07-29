@@ -15,9 +15,14 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
-        ICommand<ExtractFrameInput> CreateExtractFrameCommand();
-        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
+        ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
+
+        ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
+        ICommand<AudioEffectModel> CreateAudioEffectCommand();
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
+        ICommand<FadeEffectModel> CreateFadeEffectCommand();
+
     }
     public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
@@ -35,10 +40,17 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new WatermarkCommand(_executor, _commandBuilder);
         }
+
         public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
         {
             return new ExtractFrameCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<FadeEffectModel> CreateFadeEffectCommand()
+        {
+            return new FadeEffectCommand(_executor, _commandBuilder);
+        }
+
         public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
         {
             return new ReverseVideoCommand(_executor, _commandBuilder);
@@ -51,9 +63,23 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+
+
+        public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
+        {
+            return new ChangeSpeedCommand(_executor, _commandBuilder);
+        }
+        
+        public ICommand<AudioEffectModel> CreateAudioEffectCommand()
+        {
+            return new AudioEffectCommand(_executor, _commandBuilder);
+        }
+        
         public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
         {
             return new ConvertAudioCommand(_executor, _commandBuilder);
+
+
         }
     }
 }

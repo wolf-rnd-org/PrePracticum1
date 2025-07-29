@@ -1,5 +1,6 @@
 ﻿using Ffmpeg.Command;
 using Ffmpeg.Command.Commands;
+using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;

@@ -79,6 +79,7 @@ namespace FFmpeg.Infrastructure.Services
             return new TimestampOverlayCommand(_executor, _commandBuilder);
         }
 
+
         public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
         {
             return new ChangeSpeedCommand(_executor, _commandBuilder);

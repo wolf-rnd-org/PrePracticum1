@@ -39,21 +39,8 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/extract-frame", ExtractFrame)
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-            app.MapPost("/api/video/reverse", ReverseVideo)
-               .DisableAntiforgery()
-               .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB       
+           
             app.MapPost("/api/audio/convert", ConvertAudio)
-
-               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
-            app.MapPost("/api/audio/convert", ConvertAudio)
-
-
-                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
-            app.MapPost("/api/audio/convert", ConvertAudio)
-
-
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
 

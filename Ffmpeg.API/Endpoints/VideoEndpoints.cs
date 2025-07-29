@@ -425,7 +425,6 @@ namespace FFmpeg.API.Endpoints
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error in ApplyAudioEffect endpoint");
-
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }

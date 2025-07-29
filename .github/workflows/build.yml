@@ -16,10 +16,14 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: "9.0.x"
 
       - name: Restore dependencies
         run: dotnet restore Ffmpeg.sln
 
       - name: Build project
+<<<<<<< HEAD
         run: dotnet build Ffmpeg.sln --configuration Release --no-restore
+=======
+        run: dotnet build --configuration Release --no-restore
+>>>>>>> fd56708c6850858534f4bc28fa3a1716c15ec8b7

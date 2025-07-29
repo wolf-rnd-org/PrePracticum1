@@ -18,7 +18,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
 
-        ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
+        ICommand<ExtractFrameInput> CreateExtractFrameCommand();
 
 
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
@@ -29,12 +29,11 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
+        ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
 
         ICommand<PreviewModel> CreatePreviewCommand();
     }
 
-
-    }
     public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         private readonly FFmpegExecutor _executor;
@@ -73,12 +72,10 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
-
         public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
         {
             return new AnimatedTextCommand(_executor, _commandBuilder);
         }
-
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {
             return new TimestampOverlayCommand(_executor, _commandBuilder);
@@ -92,7 +89,7 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<AudioEffectModel> CreateAudioEffectCommand()
         {
             return new AudioEffectCommand(_executor, _commandBuilder);
-        } 
+        }
         public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
         {
             return new ConvertAudioCommand(_executor, _commandBuilder);
@@ -103,5 +100,11 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new PreviewCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
+        {
+            return new MergeTwoFilesCommand(_executor, _commandBuilder);
+        }
     }
+}
 

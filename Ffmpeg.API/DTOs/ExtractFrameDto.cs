@@ -3,6 +3,6 @@
     public class ExtractFrameDto
     {
         public IFormFile VideoFile { get; set; }
-        public TimeSpan TimeSpan { get; set; } // 
+        public TimeSpan TimeSpan { get; set; } 
     }
 }

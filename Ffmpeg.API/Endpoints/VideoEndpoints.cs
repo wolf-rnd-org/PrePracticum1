@@ -39,11 +39,15 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/video/border", AddBorder)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600));
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/audio/convert", ConvertAudio)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+
+            app.MapPost("/api/video/timestamp", AddTimestampOverlay)
+                .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/change-speed", ChangeVideoSpeed)
                 .DisableAntiforgery()
@@ -52,18 +56,26 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/audio/effect", ApplyAudioEffect)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+<<<<<<< HEAD
             app.MapPost("/api/video/crop", CropVideo)
               .DisableAntiforgery()
               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+=======
+
+            app.MapPost("/api/video/thumbnail", CreatePreview)
+                .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+>>>>>>> 75a01a3733b08d2858b99755159877151a4be878
         }
 
         private static async Task<IResult> ReverseVideo(
-          HttpContext context,
-          [FromForm] ReverseVideoDto dto)
+            HttpContext context,
+            [FromForm] ReverseVideoDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
             try
             {
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
@@ -86,6 +98,7 @@ namespace FFmpeg.API.Endpoints
                             result.ErrorMessage, result.CommandExecuted);
                         return Results.Problem("Failed to reverse file: " + result.ErrorMessage, statusCode: 500);
                     }
+
                     byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
 
@@ -422,6 +435,58 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
+        private static async Task<IResult> AddTimestampOverlay(
+            HttpContext context,
+            [FromForm] TimestampOverlayDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            try
+            {
+                if (dto.VideoFile == null || dto.VideoFile.Length == 0)
+                    return Results.BadRequest("Video file is required");
+
+                string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+
+                List<string> filesToCleanup = new() { inputFileName, outputFileName };
+
+                try
+                {
+                    var command = ffmpegService.CreateTimestampOverlayCommand();
+                    var result = await command.ExecuteAsync(new TimestampOverlayModel
+                    {
+                        InputFilePath = inputFileName,
+                        OutputFilePath = outputFileName
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("TimestampOverlayCommand failed: {Error}, Command: {Command}",
+                       result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to add timestamp overlay: " + result.ErrorMessage);
+                    }
+
+                    var fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing timestamp overlay request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unexpected error in AddTimestampOverlay");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
         private static async Task<IResult> ChangeVideoSpeed(
             HttpContext context,
             [FromForm] ChangeSpeedDto dto)
@@ -527,5 +592,59 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+        private static async Task<IResult> CreatePreview(
+    HttpContext context,
+    [FromForm] PreviewDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                if (dto.VideoFile == null)
+                    return Results.BadRequest("Video file is required");
+
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(".jpg");
+                List<string> filesToCleanup = new() { videoFileName, outputFileName };
+                string timestamp = string.IsNullOrEmpty(dto.Timestamp) ? "00:00:05" : dto.Timestamp;
+                try
+                {
+                    var command = ffmpegService.CreatePreviewCommand();
+                    var result = await command.ExecuteAsync(new PreviewModel
+                    {
+                        InputFile = videoFileName,
+                        OutputFile = outputFileName,
+                        Timestamp = timestamp
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to create preview: " + result.ErrorMessage, statusCode: 500);
+                    }
+
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    return Results.File(fileBytes, "image/jpeg", "preview.jpg"); // או פורמט אחר בהתאם לפלט
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing preview request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in CreatePreview endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
     }
 }
+
+

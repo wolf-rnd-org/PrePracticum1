@@ -56,16 +56,16 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/audio/effect", ApplyAudioEffect)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
-<<<<<<< HEAD
+
             app.MapPost("/api/video/crop", CropVideo)
               .DisableAntiforgery()
               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-=======
+
 
             app.MapPost("/api/video/thumbnail", CreatePreview)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
->>>>>>> 75a01a3733b08d2858b99755159877151a4be878
+
         }
 
         private static async Task<IResult> ReverseVideo(

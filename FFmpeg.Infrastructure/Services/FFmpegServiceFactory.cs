@@ -16,23 +16,20 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
-<<<<<<< HEAD
+
         
         ICommand<CropModel> CreateCropCommand();
-=======
+
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
->>>>>>> 75a01a3733b08d2858b99755159877151a4be878
+
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
 
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
-<<<<<<< HEAD
 
-=======
         ICommand<PreviewModel> CreatePreviewCommand();
->>>>>>> 75a01a3733b08d2858b99755159877151a4be878
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -69,19 +66,16 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
-<<<<<<< HEAD
         public ICommand<CropModel> CreateCropCommand()
         {
             return new CropCommand(_executor, _commandBuilder);
         }
 
 
-=======
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {
             return new TimestampOverlayCommand(_executor, _commandBuilder);
         }
->>>>>>> 75a01a3733b08d2858b99755159877151a4be878
         public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
         {
             return new ChangeSpeedCommand(_executor, _commandBuilder);

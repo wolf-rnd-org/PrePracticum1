@@ -1,3 +1,4 @@
+using Ffmpeg.Command;
 using FFmpeg.API.Endpoints;
 using FFmpeg.Core.Interfaces;
 using FFmpeg.Infrastructure.Services;
@@ -29,12 +30,12 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 104857600; // 100 MB
 });
 
-builder.Services.AddSingleton<FFmpeg.Core.Interfaces.ILogger, Logger>();
+builder.Services.AddSingleton<Ffmpeg.Command.ILogger, Logger>();
 
 // Register FFmpeg Services
 builder.Services.AddScoped<IFFmpegServiceFactory>(provider =>
 {
-    var logger = provider.GetRequiredService<FFmpeg.Core.Interfaces.ILogger>();
+    var logger = provider.GetRequiredService<Ffmpeg.Command.ILogger>();
     return new FFmpegServiceFactory(builder.Configuration, logger);
 });
 
@@ -56,5 +57,5 @@ app.UseAuthorization();
 app.MapEndpoints();
 
 app.MapGet("/", () => { return "FFmpeg API is running"; });
-app.Run();
 
+app.Run();

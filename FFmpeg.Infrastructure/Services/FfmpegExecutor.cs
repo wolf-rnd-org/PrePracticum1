@@ -1,4 +1,5 @@
-﻿using FFmpeg.Core.Interfaces;
+﻿using Ffmpeg.Command;
+using FFmpeg.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -93,5 +94,4 @@ namespace FFmpeg.Infrastructure.Services
             }
         }
     }
-
 }

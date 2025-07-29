@@ -17,15 +17,14 @@ namespace FFmpeg.Infrastructure.Commands
         public ChangeBrightnessAndContrastCommand(ICommandBuilder commandBuilder, FFmpegExecutor executor) : base(executor)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
-
         }
 
         public async Task<CommandResult> ExecuteAsync(ChangeBrightnessAndContrastModel model)
         {
-            if (model.Brightness < -1 || model.Brightness > 1) // גדול מאפס 
+            if (model.Brightness < -1 || model.Brightness > 1) 
                 throw new ArgumentOutOfRangeException(nameof(model.Brightness), "Brightness must be between -1.0 and 1.0");// בין 1- ל1
 
-            if (model.Contrast <= 0)
+            if (model.Contrast <= 0)// גדול מאפס 
                 throw new ArgumentOutOfRangeException(nameof(model.Contrast), "Contrast must be greater than 0");
 
             CommandBuilder = _commandBuilder

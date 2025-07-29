@@ -1,5 +1,6 @@
 ﻿using Ffmpeg.Command;
 using Ffmpeg.Command.Commands;
+using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
@@ -30,6 +31,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
+        ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
 
         ICommand<PreviewModel> CreatePreviewCommand();
     }
@@ -84,6 +86,7 @@ namespace FFmpeg.Infrastructure.Services
 
 
 
+
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {
             return new TimestampOverlayCommand(_executor, _commandBuilder);
@@ -108,5 +111,10 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new PreviewCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
+        {
+            return new MergeTwoFilesCommand(_executor, _commandBuilder);
+        } 
     }
 

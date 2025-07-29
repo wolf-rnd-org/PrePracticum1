@@ -20,9 +20,7 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize))
-                .WithMetadata(new RequestSizeLimitAttribute(104857600));// 100 MB     
-
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/fadein", AddFadeInEffect)
                 .DisableAntiforgery()
@@ -32,35 +30,21 @@ namespace FFmpeg.API.Endpoints
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
 
-
             app.MapPost("/api/video/border", AddBorder)
                 .DisableAntiforgery()
-
-                .WithMetadata(new RequestSizeLimitAttribute(104857600));           
+                .WithMetadata(new RequestSizeLimitAttribute(104857600));         
+            
             app.MapPost("/api/video/extract-frame", ExtractFrame)
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));    
-            app.MapPost("/api/video/reverse", ReverseVideo)
-               .DisableAntiforgery()
-               .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB       
-             app.MapPost("/api/audio/convert", ConvertAudio)
-
-                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
+                   
             app.MapPost("/api/video/animatedtext", AddAnimatedText)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/audio/convert", ConvertAudio)
-
-
-                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
-            app.MapPost("/api/audio/convert", ConvertAudio)
-
-
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize)); // 50MB
 
             app.MapPost("/api/video/timestamp", AddTimestampOverlay)
                 .DisableAntiforgery()

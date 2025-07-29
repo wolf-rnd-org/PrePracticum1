@@ -451,7 +451,7 @@ namespace FFmpeg.API.Endpoints
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(".jpg");
                 List<string> filesToCleanup = new() { videoFileName, outputFileName };
-
+                string timestamp = string.IsNullOrEmpty(dto.Timestamp) ? "00:00:05" : dto.Timestamp;
                 try
                 {
                     var command = ffmpegService.CreatePreviewCommand();
@@ -459,7 +459,7 @@ namespace FFmpeg.API.Endpoints
                     {
                         InputFile = videoFileName,
                         OutputFile = outputFileName,
-                        Timestamp = dto.Timestamp
+                        Timestamp = timestamp
                     });
 
                     if (!result.IsSuccess)

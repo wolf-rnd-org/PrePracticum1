@@ -8,7 +8,7 @@
         public int YPosition { get; set; } = 0;
         public int FontSize { get; set; } = 60;
         public string FontColor { get; set; } = "white";
-        public bool IsAnimated { get; set; } = false;
+        public bool IsAnimated { get; set; } = true;
         public int AnimationSpeed { get; set; } = 100;
     }
 }

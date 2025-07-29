@@ -17,13 +17,10 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
 
-<<<<<<< HEAD
         
         ICommand<CropModel> CreateCropCommand();
-=======
         ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
 
->>>>>>> 28ab2cb684b42a246853984e55e89726424ae817
 
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
 
@@ -77,14 +74,14 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
-<<<<<<< HEAD
+
         public ICommand<CropModel> CreateCropCommand()
         {
             return new CropCommand(_executor, _commandBuilder);
         }
-=======
 
->>>>>>> 28ab2cb684b42a246853984e55e89726424ae817
+
+
 
 
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()

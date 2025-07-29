@@ -73,14 +73,10 @@ namespace FFmpeg.Infrastructure.Services
             return new BorderCommand(_executor, _commandBuilder);
         }
 
-<<<<<<< HEAD
         public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
         {
             return new AnimatedTextCommand(_executor, _commandBuilder);
         }
-=======
-
->>>>>>> master
 
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {

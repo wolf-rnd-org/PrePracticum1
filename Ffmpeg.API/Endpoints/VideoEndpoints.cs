@@ -27,10 +27,6 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-<<<<<<< HEAD
-            //.WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
-=======
->>>>>>> master
 
             app.MapPost("/api/video/fadein", AddFadeInEffect)
                 .DisableAntiforgery()
@@ -63,7 +59,6 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/thumbnail", CreatePreview)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
         }
 
         private static async Task<IResult> ReverseVideo(
@@ -542,7 +537,6 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-        
         private static async Task<IResult> CreatePreview(
     HttpContext context,
     [FromForm] PreviewDto dto)
@@ -595,7 +589,6 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-
     }
 }
 

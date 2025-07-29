@@ -23,14 +23,12 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
         ICommand<PreviewModel> CreatePreviewCommand();
-
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         private readonly FFmpegExecutor _executor;
         private readonly ICommandBuilder _commandBuilder;
-
         public FFmpegServiceFactory(IConfiguration configuration, ILogger logger = null)
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -41,7 +39,6 @@ namespace FFmpeg.Infrastructure.Services
             _executor = new FFmpegExecutor(ffmpegPath, logOutput, logger);
             _commandBuilder = new CommandBuilder(configuration);
         }
-
         public ICommand<WatermarkModel> CreateWatermarkCommand()
         {
             return new WatermarkCommand(_executor, _commandBuilder);
@@ -50,37 +47,30 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new FadeEffectCommand(_executor, _commandBuilder);
         }
-
         public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
         {
             return new ReverseVideoCommand(_executor, _commandBuilder);
         }
-
         public ICommand<GreenScreenModel> CreateGreenScreenCommand()
         {
             return new GreenScreenCommand(_executor, _commandBuilder);
         }
-        
         public ICommand<BorderModel> CreateBorderCommand()
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
-
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {
             return new TimestampOverlayCommand(_executor, _commandBuilder);
         }
-
         public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
         {
             return new ChangeSpeedCommand(_executor, _commandBuilder);
         }
-        
         public ICommand<AudioEffectModel> CreateAudioEffectCommand()
         {
             return new AudioEffectCommand(_executor, _commandBuilder);
-        }
-        
+        } 
         public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
         {
             return new ConvertAudioCommand(_executor, _commandBuilder);

@@ -79,7 +79,13 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/thumbnail", CreatePreview)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+            app.MapPost("/api/video/subtitles", AddSubtitles)
+               .DisableAntiforgery()
+               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
+            app.MapPost("/api/video/change-resolution", ChangeResolution)
+              .DisableAntiforgery()
+              .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
         }
 
         private static async Task<IResult> CutVideo(HttpContext context, [FromForm] CutVideoDto dto)
@@ -310,8 +316,154 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+        //<<<<<<< HEAD
 
-      
+
+        //        private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
+        //=======
+        //        private static async Task<IResult> AddSubtitles(
+        //        HttpContext context,
+        //        [FromForm] SubtitleTranslationDto dto)
+        //        {
+        //            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+        //            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+        //            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        //            try
+        //            {
+        //                if (dto.VideoFile == null || dto.SubtitleFile == null)
+        //                    return Results.BadRequest("Video file and subtitle file are required");
+        //                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+        //                string subtitleFileName = await fileService.SaveUploadedFileAsync(dto.SubtitleFile);
+        //                string extension = Path.GetExtension(dto.VideoFile.FileName);
+        //                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+        //                var filesToCleanup = new List<string> { videoFileName, subtitleFileName, outputFileName };
+        //                try
+        //                {
+        //                    var command = ffmpegService.CreateSubtitleTranslationCommand();
+        //                    var result = await command.ExecuteAsync(new SubtitleTranslationModel
+        //                    {
+        //                        InputFile = videoFileName,
+        //                        SubtitleFile = subtitleFileName,
+        //                        OutputFile = outputFileName
+        //                    });
+        //                    if (!result.IsSuccess)
+        //                    {
+        //                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+        //                            result.ErrorMessage, result.CommandExecuted);
+        //                        return Results.Problem("Failed to add subtitles: " + result.ErrorMessage, statusCode: 500);
+        //                    }
+        //                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    logger.LogError(ex, "Error processing subtitle translation request");
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    throw;
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                logger.LogError(ex, "Error in AddSubtitles endpoint");
+        //                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+        //            }
+        //        }
+        //         private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
+        //>>>>>>> 9cb0c1f83ce36cb11de77de65de033f82b3ffd7c
+        //        {
+        //            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+        //            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+        //            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+        //            try
+        //            {
+        //                if (dto.VideoFile == null || dto.BackgroundFile == null)
+        //                    return Results.BadRequest("Video file and background file are required");
+
+        //                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+        //                string backgroundFileName = await fileService.SaveUploadedFileAsync(dto.BackgroundFile);
+        //                string extension = Path.GetExtension(dto.VideoFile.FileName);
+        //                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+
+        //                var filesToCleanup = new List<string> { videoFileName, backgroundFileName, outputFileName };
+
+        //                var command = ffmpegService.CreateGreenScreenCommand();
+        //                var result = await command.ExecuteAsync(new GreenScreenModel
+        //                {
+        //                    InputFile = videoFileName,
+        //                    BackgroundFile = backgroundFileName,
+        //                    OutputFile = outputFileName,
+        //                    VideoCodec = "libx264"
+        //                });
+
+        //                if (!result.IsSuccess)
+        //                {
+        //                    logger.LogError("FFmpeg GreenScreen failed: {ErrorMessage}, Command: {Command}", result.ErrorMessage, result.CommandExecuted);
+        //                    return Results.Problem("Failed to process green screen: " + result.ErrorMessage, statusCode: 500);
+        //                }
+
+        //                byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+        //                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+        //                return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                logger.LogError(ex, "Error in GreenScreen endpoint");
+        //                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+        //            }
+        //        }
+
+        private static async Task<IResult> AddSubtitles(
+    HttpContext context,
+    [FromForm] SubtitleTranslationDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            try
+            {
+                if (dto.VideoFile == null || dto.SubtitleFile == null)
+                    return Results.BadRequest("Video file and subtitle file are required");
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string subtitleFileName = await fileService.SaveUploadedFileAsync(dto.SubtitleFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+                var filesToCleanup = new List<string> { videoFileName, subtitleFileName, outputFileName };
+                try
+                {
+                    var command = ffmpegService.CreateSubtitleTranslationCommand();
+                    var result = await command.ExecuteAsync(new SubtitleTranslationModel
+                    {
+                        InputFile = videoFileName,
+                        SubtitleFile = subtitleFileName,
+                        OutputFile = outputFileName
+                    });
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to add subtitles: " + result.ErrorMessage, statusCode: 500);
+                    }
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing subtitle translation request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in AddSubtitles endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
         private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
@@ -356,6 +508,7 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+
 
         private static async Task<IResult> AddBorder(HttpContext context, [FromForm] BorderDto dto)
         {
@@ -670,9 +823,195 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
+        //<<<<<<< HEAD
+        //        private static async Task<IResult> ReduceQuality(
+        //     HttpContext context,
+        //     [FromForm] ReduceQualityDto dto)
+        //        {
+        //            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+        //            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+        //            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+        //            try
+        //            {
+        //                if (dto.VideoFile == null)
+        //                {
+        //                    return Results.BadRequest("Video file is required");
+        //                }
+
+        //                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+        //                string extension = Path.GetExtension(dto.VideoFile.FileName);
+        //                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+        //                List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
+
+        //                try
+        //                {
+        //                    var command = ffmpegService.CreateReduceQualityCommand();
+        //                    var result = await command.ExecuteAsync(new ReduceQualityModel
+        //                    {
+        //                        InputFile = videoFileName,
+        //                        OutputFile = outputFileName
+        //                    });
+
+        //                    if (!result.IsSuccess)
+        //                    {
+        //                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+        //                            result.ErrorMessage, result.CommandExecuted);
+        //                        return Results.Problem("Failed to reduce video quality: " + result.ErrorMessage, statusCode: 500);
+        //                    }
+
+        //                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    logger.LogError(ex, "Error processing reduce quality request");
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    throw;
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                logger.LogError(ex, "Error in ReduceQuality endpoint");
+        //                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+        //            }
+        //        }
+
+        //        private static async Task<IResult> MergeTwoFiles(
+        //            HttpContext context,
+        //            [FromForm] MergeTwoFilesDto dto)
+        //=======
+        //        private static async Task<IResult> MergeTwoFiles(
+        //        HttpContext context,
+        //        [FromForm] MergeTwoFilesDto dto)
+        //>>>>>>> 9cb0c1f83ce36cb11de77de65de033f82b3ffd7c
+        //        {
+        //            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+        //            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+        //            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        //<<<<<<< HEAD
+
+        //=======
+        //>>>>>>> 9cb0c1f83ce36cb11de77de65de033f82b3ffd7c
+        //            try
+        //            {
+        //                if (dto.FirstInputFile == null || dto.SecondInputFile == null)
+        //                    return Results.BadRequest("Videos files are required");
+
+        //                string firstVideoFileName = await fileService.SaveUploadedFileAsync(dto.FirstInputFile);
+        //                string secondVideoFileName = await fileService.SaveUploadedFileAsync(dto.SecondInputFile);
+        //                string extension = Path.GetExtension(dto.FirstInputFile.FileName);
+        //                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+
+        //                var filesToCleanup = new List<string> { firstVideoFileName, secondVideoFileName, outputFileName };
+
+        //                try
+        //                {
+        //                    var command = ffmpegService.CreateMergeTwoFilesCommand();
+        //                    var result = await command.ExecuteAsync(new MergeTwoFilesModel
+        //                    {
+        //                        FirstInputFile = firstVideoFileName,
+        //                        SecondInputFile = secondVideoFileName,
+        //                        OutputFile = outputFileName
+        //                    });
+
+        //                    if (!result.IsSuccess)
+        //                    {
+        //                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+        //                            result.ErrorMessage, result.CommandExecuted);
+        //                        return Results.Problem("Failed to merge videos: " + result.ErrorMessage, statusCode: 500);
+        //                    }
+
+        //                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //<<<<<<< HEAD
+        //=======
+
+        //>>>>>>> 9cb0c1f83ce36cb11de77de65de033f82b3ffd7c
+        //                    return Results.File(fileBytes, "video/mp4", dto.FirstInputFile.FileName);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    logger.LogError(ex, "Error processing merge request");
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    throw;
+        //                }
+        //            }
+        //<<<<<<< HEAD
+        //=======
+
+        //>>>>>>> 9cb0c1f83ce36cb11de77de65de033f82b3ffd7c
+        //            catch (Exception ex)
+        //            {
+        //                logger.LogError(ex, "Error in MergeTwoFiles endpoint");
+        //                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+        //            }
+        //        }
+        //<<<<<<< HEAD
+        //    }
+        //}
+        //=======
+
+        //        private static async Task<IResult> ChangeResolution(
+        //                  HttpContext context,
+        //                  [FromForm] ChangeResolutionDto dto)
+        //        {
+        //            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+        //            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+        //            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        //            try
+        //            {
+        //                if (dto.VideoFile == null)
+        //                {
+        //                    return Results.BadRequest("Video file is required");
+        //                }
+        //                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+        //                string extension = Path.GetExtension(dto.VideoFile.FileName);
+        //                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+        //                List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
+        //                try
+        //                {
+        //                    var command = ffmpegService.CreateChangeResolutionCommand();
+        //                    var result = await command.ExecuteAsync(new ChangeResolutionModel
+        //                    {
+        //                        InputFile = videoFileName,
+        //                        Width = dto.Width,
+        //                        Height = dto.Height,
+        //                        OutputFile = outputFileName,
+        //                        VideoCodec = "libx264"
+        //                    });
+        //                    if (!result.IsSuccess)
+        //                    {
+        //                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {CommandExecuted}",
+        //                            result.ErrorMessage, result.CommandExecuted);
+        //                        return Results.Problem("Failed to change resolution: " + result.ErrorMessage, statusCode: 500);
+        //                    }
+        //                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    logger.LogError(ex, "Error processing change resolution request");
+        //                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+        //                    throw;
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                logger.LogError(ex, "Error in ChangeResolution endpoint");
+        //                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+        //            }
+        //        }
+        //    }
+        //}
+        //>>>>>>> 9cb0c1f83ce36cb11de77de65de033f82b3ffd7c
+
+
         private static async Task<IResult> ReduceQuality(
-     HttpContext context,
-     [FromForm] ReduceQualityDto dto)
+            HttpContext context,
+            [FromForm] ReduceQualityDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
@@ -731,7 +1070,6 @@ namespace FFmpeg.API.Endpoints
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-
             try
             {
                 if (dto.FirstInputFile == null || dto.SecondInputFile == null)
@@ -778,5 +1116,59 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+
+        private static async Task<IResult> ChangeResolution(
+            HttpContext context,
+            [FromForm] ChangeResolutionDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            try
+            {
+                if (dto.VideoFile == null)
+                {
+                    return Results.BadRequest("Video file is required");
+                }
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+                List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
+                try
+                {
+                    var command = ffmpegService.CreateChangeResolutionCommand();
+                    var result = await command.ExecuteAsync(new ChangeResolutionModel
+                    {
+                        InputFile = videoFileName,
+                        Width = dto.Width,
+                        Height = dto.Height,
+                        OutputFile = outputFileName,
+                        VideoCodec = "libx264"
+                    });
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {CommandExecuted}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to change resolution: " + result.ErrorMessage, statusCode: 500);
+                    }
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing change resolution request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ChangeResolution endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
     }
 }
+
+

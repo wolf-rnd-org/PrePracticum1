@@ -20,7 +20,6 @@ namespace FFmpeg.Infrastructure.Services
 
         ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
 
-
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
 
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
@@ -31,6 +30,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
 
         ICommand<PreviewModel> CreatePreviewCommand();
+        ICommand<SubtitleTranslationModel> SubtitleTranslationCommand();
     }
 
 
@@ -102,6 +102,10 @@ namespace FFmpeg.Infrastructure.Services
         public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
         {
             return new MergeTwoFilesCommand(_executor, _commandBuilder);
-        } 
-    }
+        }
+        public ICommand<SubtitleTranslationModel> AddSubtitleTranslation()
+        {
+            return new SubtitleTranslationCommand(_executor, _commandBuilder);
+        }
+}
 

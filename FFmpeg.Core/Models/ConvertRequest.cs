@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace FFmpeg.Core.Models
 {
-    public class ConvertAudioModel
+    public class ConvertRequest
     {
-        public string InputFile { get; set; } = string.Empty;
-        public string OutputFile { get; set; } = string.Empty;
+        public IFormFile Video { get; set; }
+        public string Bitrate { get; set; }
     }
-
 }

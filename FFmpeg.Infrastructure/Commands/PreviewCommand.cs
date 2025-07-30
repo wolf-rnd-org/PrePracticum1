@@ -9,25 +9,27 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Infrastructure.Commands
 {
-
-
-    public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
+    public class PreviewCommand:BaseCommand, ICommand<PreviewModel>
     {
         private readonly ICommandBuilder _commandBuilder;
 
-        public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+        public PreviewCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
             : base(executor)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
         }
 
-        public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
+        public async Task<CommandResult> ExecuteAsync(PreviewModel model)
         {
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
+                .AddOption($"-ss {model.Timestamp}")
+                .AddOption("-vframes 1")
                 .SetOutput(model.OutputFile, true);
 
             return await RunAsync();
         }
     }
+
+
 }

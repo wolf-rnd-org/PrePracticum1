@@ -1,6 +1,6 @@
 ﻿namespace FFmpeg.API.DTOs
 {
-    public class ReverseVideoDto
+    public class TimestampOverlayDto
     {
         public IFormFile VideoFile { get; set; }
     }

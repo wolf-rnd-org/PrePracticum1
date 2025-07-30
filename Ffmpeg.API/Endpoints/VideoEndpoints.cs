@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Http;
+
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using FFmpeg.API.DTOs;
 using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
@@ -21,10 +17,15 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/watermark", AddWatermark)
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
+
+                 app.MapPost("/api/video/blackandwhite", AddBlackAndWhite)
+  .DisableAntiforgery()
+  .WithMetadata(new RequestSizeLimitAttribute(104857600));
+
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize))
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+                .WithMetadata(new RequestSizeLimitAttribute(104857600)); 
 
             app.MapPost("/api/video/cut", CutVideo)
                 .DisableAntiforgery()
@@ -37,11 +38,11 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/video/reverse", ReverseVideo)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize)); 
 
             app.MapPost("/api/video/border", AddBorder)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600));
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/extract-frame", ExtractFrame)
                 .DisableAntiforgery()
@@ -49,7 +50,7 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/audio/convert", ConvertAudio)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize)); 
 
             app.MapPost("/api/video/timestamp", AddTimestampOverlay)
                 .DisableAntiforgery()
@@ -61,7 +62,7 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/audio/effect", ApplyAudioEffect)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize)); 
 
             app.MapPost("/api/video/crop", CropVideo)
               .DisableAntiforgery()
@@ -71,7 +72,6 @@ namespace FFmpeg.API.Endpoints
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
-
             app.MapPost("/api/video/thumbnail", CreatePreview)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
@@ -80,6 +80,66 @@ namespace FFmpeg.API.Endpoints
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
         }
+
+           private static async Task<IResult> AddBlackAndWhite(
+   HttpContext context,
+   [FromForm] BlackAndWhiteDto dto)
+   {
+       var fileService = context.RequestServices.GetRequiredService<IFileService>();
+       var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+       var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+       try
+       {
+           if (dto.InputFile == null)
+           {
+               return Results.BadRequest("Input video file is required");
+           }
+
+           string videoFileName = await fileService.SaveUploadedFileAsync(dto.InputFile);
+           string outputFileName = dto.OutputFileName ?? await fileService.GenerateUniqueFileNameAsync(".mp4");
+
+           // Track files to clean up
+           List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
+
+           try
+           {
+               // Create and execute the black-and-white command
+               var command = ffmpegService.CreateBlackAndWhiteCommand();
+               var result = await command.ExecuteAsync(new BlackAndWhiteModel
+               {
+                   InputFile = videoFileName,
+                   OutputFile = outputFileName
+               });
+
+               if (!result.IsSuccess)
+               {
+                   logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                       result.ErrorMessage, result.CommandExecuted);
+                   return Results.Problem("Failed to apply black and white filter: " + result.ErrorMessage, statusCode: 500);
+               }
+
+               byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+
+               // Clean up temporary files
+               _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+               return Results.File(fileBytes, "video/mp4", dto.OutputFileName);
+           }
+           catch (Exception ex)
+           {
+               logger.LogError(ex, "Error processing black and white filter request");
+               _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+               throw;
+           }
+       }
+       catch (Exception ex)
+       {
+           logger.LogError(ex, "Error in AddBlackAndWhite endpoint");
+           return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+       }
+   }
+
 
         private static async Task<IResult> CutVideo(HttpContext context, [FromForm] CutVideoDto dto)
         {

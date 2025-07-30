@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace FFmpeg.Core.Models
 {
-    public class BorderModel
+    public class BlackAndWhiteModel
     {
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
-        public string FrameColor { get; set; } = "blue";
-        public int BorderSize { get; set; } = 20;
-        public string VideoCodec { get; set; } = "libx264";
-        public bool IsVideo { get; set; } = true;
     }
 }
-

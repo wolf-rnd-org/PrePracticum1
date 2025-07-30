@@ -327,7 +327,7 @@ namespace FFmpeg.API.Endpoints
                 var filesToCleanup = new List<string> { videoFileName, subtitleFileName, outputFileName };
                 try
                 {
-                    var command = ffmpegService.();
+                    var command = ffmpegService.CreateSubtitleTranslationCommand();
                     var result = await command.ExecuteAsync(new SubtitleTranslationModel
                     {
                         InputFile = videoFileName,

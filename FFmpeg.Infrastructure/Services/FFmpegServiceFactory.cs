@@ -114,5 +114,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new ReduceQualityCommand(_executor, _commandBuilder);
     }
+}
 
 

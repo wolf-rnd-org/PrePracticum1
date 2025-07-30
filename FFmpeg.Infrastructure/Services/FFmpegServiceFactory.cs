@@ -21,7 +21,6 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
         ICommand<ConvertFormatModel> CreateConvertFormatCommand();
-
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory

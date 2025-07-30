@@ -50,7 +50,7 @@ namespace FFmpeg.API.Endpoints
                 .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
             app.MapPost("/api/video/convertformat", ConvertVideoFormat)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600));
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
         }
 
         private static async Task<IResult> ReverseVideo(
@@ -486,6 +486,5 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-
     }
 }

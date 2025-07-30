@@ -33,7 +33,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
 
         ICommand<PreviewModel> CreatePreviewCommand();
-        ICommand<SubtitleTranslationModel> SubtitleTranslationCommand();
+        ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
     }
 
 
@@ -116,7 +116,7 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new MergeTwoFilesCommand(_executor, _commandBuilder);
         }
-        public ICommand<SubtitleTranslationModel> AddSubtitleTranslation()
+        public ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand()
         {
             return new SubtitleTranslationCommand(_executor, _commandBuilder);
         }

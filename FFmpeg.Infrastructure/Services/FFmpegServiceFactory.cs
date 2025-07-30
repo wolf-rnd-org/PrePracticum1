@@ -17,12 +17,9 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<WatermarkModel> CreateWatermarkCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
-
+        ICommand<CropModel> CreateCropCommand();
         ICommand<ExtractFrameInput> CreateExtractFrameCommand();
-
-
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
-
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AnimatedTextModel> CreateAnimatedTextCommand();
@@ -30,7 +27,6 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
-
         ICommand<PreviewModel> CreatePreviewCommand();
     }
 }
@@ -72,16 +68,15 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new BorderCommand(_executor, _commandBuilder);
     }
-    public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
+
+    public ICommand<CropModel> CreateCropCommand()
     {
-        return new AnimatedTextCommand(_executor, _commandBuilder);
+        return new CropCommand(_executor, _commandBuilder);
     }
     public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
     {
         return new TimestampOverlayCommand(_executor, _commandBuilder);
     }
-
-
     public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
     {
         return new ChangeSpeedCommand(_executor, _commandBuilder);
@@ -93,16 +88,17 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
     {
         return new ConvertAudioCommand(_executor, _commandBuilder);
-
-
     }
     public ICommand<PreviewModel> CreatePreviewCommand()
     {
         return new PreviewCommand(_executor, _commandBuilder);
     }
-
+    public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
+    {
+        return new AnimatedTextCommand(_executor, _commandBuilder);
+    }
     public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
     {
         return new MergeTwoFilesCommand(_executor, _commandBuilder);
-    }
+    } 
 }

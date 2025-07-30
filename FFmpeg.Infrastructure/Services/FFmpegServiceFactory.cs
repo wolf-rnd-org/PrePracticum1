@@ -46,12 +46,10 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new WatermarkCommand(_executor, _commandBuilder);
     }
-
     public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
     {
         return new ExtractFrameCommand(_executor, _commandBuilder);
     }
-
     public ICommand<FadeEffectModel> CreateFadeEffectCommand()
     {
         return new FadeEffectCommand(_executor, _commandBuilder);
@@ -68,7 +66,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new BorderCommand(_executor, _commandBuilder);
     }
-
     public ICommand<CropModel> CreateCropCommand()
     {
         return new CropCommand(_executor, _commandBuilder);

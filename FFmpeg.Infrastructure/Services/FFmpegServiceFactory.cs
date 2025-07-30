@@ -18,12 +18,15 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
 
+        
+        ICommand<CropModel> CreateCropCommand();
         ICommand<ExtractFrameInput> CreateExtractFrameCommand();     
 
 
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
 
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
+
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
@@ -73,6 +76,16 @@ namespace FFmpeg.Infrastructure.Services
         {
             return new BorderCommand(_executor, _commandBuilder);
         }
+
+        public ICommand<CropModel> CreateCropCommand()
+        {
+            return new CropCommand(_executor, _commandBuilder);
+        }
+
+
+
+
+
 
         public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
         {

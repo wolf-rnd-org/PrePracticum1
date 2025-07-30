@@ -21,6 +21,8 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
+        ICommand<ConvertFormatModel> CreateConvertFormatCommand();
+
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
         ICommand<PreviewModel> CreatePreviewCommand();
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
@@ -47,26 +49,32 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new WatermarkCommand(_executor, _commandBuilder);
     }
+
     public ICommand<BlackAndWhiteModel> CreateBlackAndWhiteCommand()
     {
         return new BlackAndWhiteCommand(_executor, _commandBuilder);
     }
+
     public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
     {
         return new ExtractFrameCommand(_executor, _commandBuilder);
     }
+
     public ICommand<FadeEffectModel> CreateFadeEffectCommand()
     {
         return new FadeEffectCommand(_executor, _commandBuilder);
     }
+
     public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
     {
         return new ReverseVideoCommand(_executor, _commandBuilder);
     }
+
     public ICommand<GreenScreenModel> CreateGreenScreenCommand()
     {
         return new GreenScreenCommand(_executor, _commandBuilder);
     }
+
     public ICommand<BorderModel> CreateBorderCommand()
     {
         return new BorderCommand(_executor, _commandBuilder);
@@ -86,10 +94,12 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new ChangeSpeedCommand(_executor, _commandBuilder);
     }
+
     public ICommand<AudioEffectModel> CreateAudioEffectCommand()
     {
         return new AudioEffectCommand(_executor, _commandBuilder);
     }
+
     public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
     {
         return new ConvertAudioCommand(_executor, _commandBuilder);
@@ -98,6 +108,11 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     public ICommand<PreviewModel> CreatePreviewCommand()
     {
         return new PreviewCommand(_executor, _commandBuilder);
+    }
+
+    public ICommand<ConvertFormatModel> CreateConvertFormatCommand()
+    {
+        return new ConvertFormatCommand(_executor, _commandBuilder);
     }
 
     public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
@@ -109,6 +124,7 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new SubtitleTranslationCommand(_executor, _commandBuilder);
     }
+
     public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
     {
         return new ChangeResolutionCommand(_executor, _commandBuilder);

@@ -25,12 +25,11 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/greenscreen", ApplyGreenScreen)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize))
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/cut", CutVideo)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
 
             app.MapPost("/api/video/fadein", AddFadeInEffect)
                 .DisableAntiforgery()
@@ -38,11 +37,11 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/video/reverse", ReverseVideo)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/border", AddBorder)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600));
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/extract-frame", ExtractFrame)
                 .DisableAntiforgery()
@@ -50,7 +49,7 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/audio/convert", ConvertAudio)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(52428800)); // 50MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/timestamp", AddTimestampOverlay)
                 .DisableAntiforgery()
@@ -62,7 +61,11 @@ namespace FFmpeg.API.Endpoints
 
             app.MapPost("/api/audio/effect", ApplyAudioEffect)
                 .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(104857600)); // 100 MB
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+
+            app.MapPost("/api/video/convertformat", ConvertVideoFormat)
+                .DisableAntiforgery()
+                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
             app.MapPost("/api/video/crop", CropVideo)
               .DisableAntiforgery()
@@ -72,10 +75,10 @@ namespace FFmpeg.API.Endpoints
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
-
             app.MapPost("/api/video/thumbnail", CreatePreview)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+
             app.MapPost("/api/video/subtitles", AddSubtitles)
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
@@ -83,7 +86,6 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/change-resolution", ChangeResolution)
               .DisableAntiforgery()
               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
         }
 
         private static async Task<IResult> CutVideo(HttpContext context, [FromForm] CutVideoDto dto)
@@ -362,7 +364,7 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-         private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
+        private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
@@ -824,6 +826,60 @@ namespace FFmpeg.API.Endpoints
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error in ChangeResolution endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
+        private static async Task<IResult> ConvertVideoFormat(
+    HttpContext context,
+    [FromForm] ConvertFormatDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                if (dto.InputFile == null || string.IsNullOrWhiteSpace(dto.OutputFileName))
+                    return Results.BadRequest("Input file and output format are required");
+
+                string inputFileName = await fileService.SaveUploadedFileAsync(dto.InputFile);
+                string outputExtension = "." + dto.OutputFileName.Trim().ToLower();
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(outputExtension);
+
+                List<string> filesToCleanup = new() { inputFileName, outputFileName };
+
+                try
+                {
+                    var command = ffmpegService.CreateConvertFormatCommand();
+                    var result = await command.ExecuteAsync(new ConvertFormatModel
+                    {
+                        InputFile = inputFileName,
+                        OutputFile = outputFileName
+                    });
+
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg format conversion failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Conversion failed: " + result.ErrorMessage);
+                    }
+
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    return Results.File(fileBytes, "video/" + dto.OutputFileName, "converted" + outputExtension);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error converting video format");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ConvertVideoFormat endpoint");
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }

@@ -25,6 +25,8 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
         ICommand<PreviewModel> CreatePreviewCommand();
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
+        ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
+
     }
 }
 public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -109,5 +111,9 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     public ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand()
     {
         return new SubtitleTranslationCommand(_executor, _commandBuilder);
+    }
+    public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
+    {
+        return new ChangeResolutionCommand(_executor, _commandBuilder);
     }
 }

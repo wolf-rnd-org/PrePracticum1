@@ -82,6 +82,10 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/animatedtext", AddAnimatedText)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+
+            app.MapPost("/api/video/change-resolution", ChangeResolution)
+              .DisableAntiforgery()
+              .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
         }
 
         private static async Task<IResult> CutVideo(HttpContext context, [FromForm] CutVideoDto dto)
@@ -466,6 +470,7 @@ namespace FFmpeg.API.Endpoints
             {
                 if (dto.VideoFile == null)
                     return Results.BadRequest("Video file is required");
+
                 string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
                 string outputFileName = await fileService.GenerateUniqueFileNameAsync(".png");
 
@@ -811,14 +816,13 @@ namespace FFmpeg.API.Endpoints
                     }
                     byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
                     _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-
                     return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error processing animatedtext request");
-                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
-                    throw;
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                throw;
                 }
             }
             catch (Exception ex)
@@ -827,6 +831,57 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-
+        private static async Task<IResult> ChangeResolution(
+                  HttpContext context,
+                  [FromForm] ChangeResolutionDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            try
+            {               
+                if (dto.VideoFile == null)
+                {
+                    return Results.BadRequest("Video file is required");
+                }
+                
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+                List<string> filesToCleanup = new List<string> { videoFileName, outputFileName };
+                try
+                {
+                    var command = ffmpegService.CreateChangeResolutionCommand();
+                    var result = await command.ExecuteAsync(new ChangeResolutionModel
+                    {
+                        InputFile = videoFileName,
+                        Width = dto.Width,
+                        Height = dto.Height,
+                        OutputFile = outputFileName,
+                        VideoCodec = "libx264"
+                    });
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {CommandExecuted}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to change resolution: " + result.ErrorMessage, statusCode: 500);
+                    }
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing change resolution request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ChangeResolution endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
     }
 }

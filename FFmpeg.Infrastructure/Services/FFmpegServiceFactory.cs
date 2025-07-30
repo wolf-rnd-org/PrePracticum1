@@ -100,5 +100,5 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
     {
         return new MergeTwoFilesCommand(_executor, _commandBuilder);
-    } 
+    }
 }

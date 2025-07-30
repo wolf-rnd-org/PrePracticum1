@@ -1,37 +1,31 @@
 ﻿using Ffmpeg.Command;
 using Ffmpeg.Command.Commands;
-using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
         ICommand<WatermarkModel> CreateWatermarkCommand();
+        ICommand<BlackAndWhiteModel> CreateBlackAndWhiteCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
-
+        ICommand<CropModel> CreateCropCommand();
         ICommand<ExtractFrameInput> CreateExtractFrameCommand();
-
-
         ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand();
-
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
-
         ICommand<PreviewModel> CreatePreviewCommand();
         ICommand<AnimatedTextModel> CreateAnimatedTextCommand();
+        ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
+        ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
     }
 
 
@@ -52,12 +46,14 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new WatermarkCommand(_executor, _commandBuilder);
     }
-
+    public ICommand<BlackAndWhiteModel> CreateBlackAndWhiteCommand()
+    {
+        return new BlackAndWhiteCommand(_executor, _commandBuilder);
+    }
     public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
     {
         return new ExtractFrameCommand(_executor, _commandBuilder);
     }
-
     public ICommand<FadeEffectModel> CreateFadeEffectCommand()
     {
         return new FadeEffectCommand(_executor, _commandBuilder);
@@ -74,13 +70,15 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new BorderCommand(_executor, _commandBuilder);
     }
+    public ICommand<CropModel> CreateCropCommand()
+    {
+        return new CropCommand(_executor, _commandBuilder);
+    }
 
     public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
     {
         return new TimestampOverlayCommand(_executor, _commandBuilder);
     }
-
-
     public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
     {
         return new ChangeSpeedCommand(_executor, _commandBuilder);
@@ -92,8 +90,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
     {
         return new ConvertAudioCommand(_executor, _commandBuilder);
-
-
     }
     public ICommand<PreviewModel> CreatePreviewCommand()
     {
@@ -108,5 +104,12 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new AnimatedTextCommand(_executor, _commandBuilder);
     }
+    public ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand()
+    {
+        return new SubtitleTranslationCommand(_executor, _commandBuilder);
+    }
+    public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
+    {
+        return new ChangeResolutionCommand(_executor, _commandBuilder);
+    }
 }
-

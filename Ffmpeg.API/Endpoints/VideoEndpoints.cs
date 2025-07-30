@@ -75,6 +75,9 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/thumbnail", CreatePreview)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+            app.MapPost("/api/video/subtitles", AddSubtitles)
+               .DisableAntiforgery()
+               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
         }
 
@@ -306,9 +309,55 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
-
-      
-        private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
+        private static async Task<IResult> AddSubtitles(
+        HttpContext context,
+        [FromForm] SubtitleTranslationDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            try
+            {
+                if (dto.VideoFile == null || dto.SubtitleFile == null)
+                    return Results.BadRequest("Video file and subtitle file are required");
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string subtitleFileName = await fileService.SaveUploadedFileAsync(dto.SubtitleFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+                var filesToCleanup = new List<string> { videoFileName, subtitleFileName, outputFileName };
+                try
+                {
+                    var command = ffmpegService.CreateSubtitleTranslationCommand();
+                    var result = await command.ExecuteAsync(new SubtitleTranslationModel
+                    {
+                        InputFile = videoFileName,
+                        SubtitleFile = subtitleFileName,
+                        OutputFile = outputFileName
+                    });
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to add subtitles: " + result.ErrorMessage, statusCode: 500);
+                    }
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing subtitle translation request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in AddSubtitles endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+         private static async Task<IResult> ApplyGreenScreen(HttpContext context, [FromForm] GreenScreenDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
@@ -579,19 +628,19 @@ namespace FFmpeg.API.Endpoints
             var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
-                if (dto.VideoFile == null)
-                    return Results.BadRequest("Video file is required");
+            if (dto.VideoFile == null)
+                return Results.BadRequest("Video file is required");
 
-                if (string.IsNullOrWhiteSpace(dto.EffectType))
-                    return Results.BadRequest("Effect type is required");
+            if (string.IsNullOrWhiteSpace(dto.EffectType))
+                return Results.BadRequest("Effect type is required");
 
-                string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
-                string extension = Path.GetExtension(dto.VideoFile.FileName);
-                string outputFileName = string.IsNullOrWhiteSpace(dto.OutputFileName)
-                    ? await fileService.GenerateUniqueFileNameAsync(extension)
-                    : dto.OutputFileName;
+            string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+            string extension = Path.GetExtension(dto.VideoFile.FileName);
+            string outputFileName = string.IsNullOrWhiteSpace(dto.OutputFileName)
+                ? await fileService.GenerateUniqueFileNameAsync(extension)
+                : dto.OutputFileName;
 
-                List<string> filesToCleanup = new() { inputFileName, outputFileName };
+            List<string> filesToCleanup = new() { inputFileName, outputFileName };
 
             try
             {

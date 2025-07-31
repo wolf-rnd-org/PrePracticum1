@@ -21,6 +21,10 @@ namespace FFmpeg.API.Endpoints
 
         public static void MapEndpoints(this WebApplication app)
         {
+            app.MapPost("/api/video/replace-audio", ReplaceAudio)
+              .DisableAntiforgery()
+               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+
             app.MapPost("/api/video/watermark", AddWatermark)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
@@ -106,6 +110,49 @@ namespace FFmpeg.API.Endpoints
    .DisableAntiforgery()
    .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
         }
+        private static async Task<IResult> ReplaceAudio([FromForm] ReplaceAudioDto dto, HttpContext context)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var command = context.RequestServices.GetRequiredService<AudioReplaceCommand>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            string videoTempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + Path.GetExtension(dto.VideoFile.FileName));
+            string audioTempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + Path.GetExtension(dto.AudioFile.FileName));
+            string outputTempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".mp4");
+
+            try
+            {
+                await using (var videoStream = new FileStream(videoTempFile, FileMode.Create))
+                    await dto.VideoFile.CopyToAsync(videoStream);
+
+                await using (var audioStream = new FileStream(audioTempFile, FileMode.Create))
+                    await dto.AudioFile.CopyToAsync(audioStream);
+
+                var request = new AudioReplaceModel
+                {
+                    VideoFile = videoTempFile,
+                    NewAudioFile = audioTempFile,
+                    OutputFile = outputTempFile
+                };
+
+                await command.ExecuteAsync(request);
+
+                byte[] outputBytes = await File.ReadAllBytesAsync(outputTempFile);
+                return Results.File(outputBytes, "video/mp4", "output_with_audio.mp4");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in ReplaceAudio endpoint");
+                return Results.Problem("Failed to replace audio: " + ex.Message, statusCode: 500);
+            }
+            finally
+            {
+                if (File.Exists(videoTempFile)) File.Delete(videoTempFile);
+                if (File.Exists(audioTempFile)) File.Delete(audioTempFile);
+                if (File.Exists(outputTempFile)) File.Delete(outputTempFile);
+            }
+        }
+
 
         private static async Task<IResult> AddWatermark(
             HttpContext context,
@@ -1096,9 +1143,3 @@ namespace FFmpeg.API.Endpoints
 
     }
 }
-
-
-
-
-
-

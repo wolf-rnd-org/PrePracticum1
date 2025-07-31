@@ -102,6 +102,9 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/change-resolution", ChangeResolution)
               .DisableAntiforgery()
               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+            app.MapPost("/api/video/remove-audio", RemoveAudio)
+   .DisableAntiforgery()
+   .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
         }
 
         private static async Task<IResult> AddWatermark(
@@ -1045,6 +1048,52 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+        private static async Task<IResult> RemoveAudio(
+    HttpContext context,
+    [FromForm] RemoveAudioDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            if (dto.VideoFile == null || dto.VideoFile.Length == 0)
+            {
+                return Results.BadRequest("Video file is required");
+            }
+
+            string inputFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+            string extension = Path.GetExtension(dto.VideoFile.FileName);
+            string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+            List<string> filesToCleanup = new() { inputFileName, outputFileName };
+
+            try
+            {
+                var command = ffmpegService.CreateRemoveAudioCommand();
+                var result = await command.ExecuteAsync(new RemoveAudioModel
+                {
+                    InputFile = inputFileName,
+                    OutputFile = outputFileName
+                });
+
+                if (!result.IsSuccess)
+                {
+                    logger.LogError("FFmpeg RemoveAudioCommand failed: {ErrorMessage}, Command: {Command}",
+                        result.ErrorMessage, result.CommandExecuted);
+                    return Results.Problem("Failed to remove audio: " + result.ErrorMessage, statusCode: 500);
+                }
+
+                var fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                return Results.File(fileBytes, "video/mp4", Path.GetFileName(outputFileName));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in RemoveAudio endpoint");
+                _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
+
     }
 }
 

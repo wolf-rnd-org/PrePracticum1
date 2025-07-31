@@ -30,9 +30,9 @@ namespace FFmpeg.Infrastructure.Services
 
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
         ICommand<PreviewModel> CreatePreviewCommand();
+        ICommand<AnimatedTextModel> CreateAnimatedTextCommand();
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
         ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
-
     }
    
 
@@ -49,7 +49,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
         _executor = new FFmpegExecutor(ffmpegPath, logOutput, logger);
         _commandBuilder = new CommandBuilder(configuration);
     }
-
     public ICommand<WatermarkModel> CreateWatermarkCommand()
     {
         return new WatermarkCommand(_executor, _commandBuilder);
@@ -87,10 +86,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new BorderCommand(_executor, _commandBuilder);
     }
-    public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
-    {
-        return new ConvertAudioCommand(_executor, _commandBuilder);
-    }
     public ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand()
     {
         return new ConvertVideoToGifCommand(_executor, _commandBuilder);
@@ -99,7 +94,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new TimestampOverlayCommand(_executor, _commandBuilder);
     }
-
     public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
     {
         return new ChangeSpeedCommand(_executor, _commandBuilder);
@@ -109,7 +103,10 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new AudioEffectCommand(_executor, _commandBuilder);
     }
-
+    public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+    {
+        return new ConvertAudioCommand(_executor, _commandBuilder);
+    }
     public ICommand<PreviewModel> CreatePreviewCommand()
     {
         return new PreviewCommand(_executor, _commandBuilder);
@@ -124,7 +121,10 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new MergeTwoFilesCommand(_executor, _commandBuilder);
     }
-
+    public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
+    {
+        return new AnimatedTextCommand(_executor, _commandBuilder);
+    }
     public ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand()
     {
         return new SubtitleTranslationCommand(_executor, _commandBuilder);
@@ -136,7 +136,3 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
         return new ChangeResolutionCommand(_executor, _commandBuilder);
     }
 }
-
-
-
-

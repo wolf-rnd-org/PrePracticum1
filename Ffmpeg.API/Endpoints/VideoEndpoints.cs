@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using FFmpeg.API.DTOs;
 using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
@@ -54,10 +53,6 @@ namespace FFmpeg.API.Endpoints
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
-            app.MapPost("/api/video/border", AddBorder)
-                .DisableAntiforgery()
-                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
             app.MapPost("/api/video/extract-frame", ExtractFrame)
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
@@ -92,6 +87,10 @@ namespace FFmpeg.API.Endpoints
                 .DisableAntiforgery()
                 .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
 
+            app.MapPost("/api/video/animatedtext", AddAnimatedText)
+               .DisableAntiforgery()
+               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
+
             app.MapPost("/api/video/subtitles", AddSubtitles)
                .DisableAntiforgery()
                .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
@@ -99,7 +98,6 @@ namespace FFmpeg.API.Endpoints
             app.MapPost("/api/video/change-resolution", ChangeResolution)
               .DisableAntiforgery()
               .WithMetadata(new RequestSizeLimitAttribute(MaxUploadSize));
-
         }
 
         private static async Task<IResult> AddWatermark(
@@ -408,6 +406,7 @@ namespace FFmpeg.API.Endpoints
                 return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
             }
         }
+
         private static async Task<IResult> AddSubtitles(HttpContext context, [FromForm] SubtitleTranslationDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
@@ -639,8 +638,6 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
-
-
         private static async Task<IResult> CropVideo(HttpContext context, [FromForm] CropDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
@@ -736,7 +733,6 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
-
         private static async Task<IResult> CreatePreview(HttpContext context, [FromForm] PreviewDto dto)
         {
             var fileService = context.RequestServices.GetRequiredService<IFileService>();
@@ -823,6 +819,61 @@ namespace FFmpeg.API.Endpoints
             }
         }
 
+        private static async Task<IResult> AddAnimatedText(HttpContext context, [FromForm] AnimatedTextDto dto)
+        {
+            var fileService = context.RequestServices.GetRequiredService<IFileService>();
+            var ffmpegService = context.RequestServices.GetRequiredService<IFFmpegServiceFactory>();
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            try
+            {
+                if (dto.VideoFile == null || dto.Content == null)
+                {
+                    return Results.BadRequest("Video file and content are required");
+                }
+
+                string videoFileName = await fileService.SaveUploadedFileAsync(dto.VideoFile);
+                string extension = Path.GetExtension(dto.VideoFile.FileName);
+                string outputFileName = await fileService.GenerateUniqueFileNameAsync(extension);
+                var filesToCleanup = new List<string> { videoFileName, outputFileName };
+                try
+                {
+                    var command = ffmpegService.CreateAnimatedTextCommand();
+                    var result = await command.ExecuteAsync(new AnimatedTextModel
+                    {
+                        InputFile = videoFileName,
+                        OutputFile = outputFileName,
+                        Content = dto.Content,
+                        XPosition = dto.XPosition,
+                        YPosition = dto.YPosition,
+                        FontSize = dto.FontSize,
+                        FontColor = dto.FontColor ?? "white",
+                        IsAnimated = dto.IsAnimated,
+                        AnimationSpeed = dto.AnimationSpeed,
+                    });
+                    if (!result.IsSuccess)
+                    {
+                        logger.LogError("FFmpeg command failed: {ErrorMessage}, Command: {Command}",
+                            result.ErrorMessage, result.CommandExecuted);
+                        return Results.Problem("Failed to add animatedtext: " + result.ErrorMessage, statusCode: 500);
+                    }
+                    byte[] fileBytes = await fileService.GetOutputFileAsync(outputFileName);
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+
+                    return Results.File(fileBytes, "video/mp4", dto.VideoFile.FileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing animatedtext request");
+                    _ = fileService.CleanupTempFilesAsync(filesToCleanup);
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in animatedtext endpoint");
+                return Results.Problem("An error occurred: " + ex.Message, statusCode: 500);
+            }
+        }
         private static async Task<IResult> ChangeResolution(
               HttpContext context,
               [FromForm] ChangeResolutionDto dto)

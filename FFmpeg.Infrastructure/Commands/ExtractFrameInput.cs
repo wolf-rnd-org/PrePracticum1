@@ -1,6 +1,4 @@
-
 ﻿using Ffmpeg.Command.Commands;
-using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
@@ -8,29 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FFmpeg.Core.Models;
-
-
-
 namespace FFmpeg.Infrastructure.Commands
 {
-
-
-    public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
+    public class ExtractFrameCommand : BaseCommand, ICommand<ExtractFrameInput>
     {
         private readonly ICommandBuilder _commandBuilder;
 
-        public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+        public ExtractFrameCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
             : base(executor)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
         }
-
-        public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
+        public async Task<CommandResult> ExecuteAsync(ExtractFrameInput model)
         {
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
-                .SetOutput(model.OutputFile, true);
-
+                .AddOption($"-ss {model.TimeSpan}")
+                .AddOption("-vframes 1")
+                .SetOutput(model.OutputImagePath, true); // true: no re-encode
             return await RunAsync();
         }
     }

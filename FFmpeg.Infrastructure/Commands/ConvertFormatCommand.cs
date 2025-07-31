@@ -1,4 +1,3 @@
-
 ﻿using Ffmpeg.Command.Commands;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Services;
@@ -7,29 +6,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FFmpeg.Core.Models;
-
-
 
 namespace FFmpeg.Infrastructure.Commands
 {
-
-
-    public class ConvertAudioCommand : BaseCommand, ICommand<ConvertAudioModel>
+    public class ConvertFormatCommand : BaseCommand, ICommand<ConvertFormatModel>
     {
         private readonly ICommandBuilder _commandBuilder;
 
-        public ConvertAudioCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
+        public ConvertFormatCommand(FFmpegExecutor executor, ICommandBuilder commandBuilder)
             : base(executor)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
         }
 
-        public async Task<CommandResult> ExecuteAsync(ConvertAudioModel model)
+        public async Task<CommandResult> ExecuteAsync(ConvertFormatModel model)
         {
             CommandBuilder = _commandBuilder
-                .SetInput(model.InputFile)
-                .SetOutput(model.OutputFile, true);
+                .SetInput(model.InputFile);
+
+            if (!string.IsNullOrEmpty(model.VideoCodec))
+            {
+                CommandBuilder.SetVideoCodec(model.VideoCodec);
+            }
+
+            CommandBuilder.SetOutput(model.OutputFile);
 
             return await RunAsync();
         }

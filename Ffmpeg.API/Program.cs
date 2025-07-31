@@ -49,6 +49,8 @@ builder.Services.AddScoped<FFmpegExecutor>(provider =>
 
 builder.Services.AddScoped<ICommandBuilder, CommandBuilder>();
 builder.Services.AddScoped<AudioReplaceCommand>();
+builder.Services.AddScoped<CutVideoCommand>();
+builder.Services.AddScoped<VideoCuttingService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

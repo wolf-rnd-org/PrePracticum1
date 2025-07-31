@@ -1,5 +1,6 @@
 ﻿using Ffmpeg.Command;
 using Ffmpeg.Command.Commands;
+using FFmpeg.Core.Interfaces;
 using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
@@ -26,16 +27,14 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
+        ICommand<ReduceQualityModel> CreateReduceQualityCommand();
         ICommand<ConvertFormatModel> CreateConvertFormatCommand();
-
         ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand();
         ICommand<PreviewModel> CreatePreviewCommand();
         ICommand<AnimatedTextModel> CreateAnimatedTextCommand();
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
         ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
     }
-   
-
 }
 public class FFmpegServiceFactory : IFFmpegServiceFactory
 {
@@ -81,7 +80,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new GreenScreenCommand(_executor, _commandBuilder);
     }
-
     public ICommand<BorderModel> CreateBorderCommand()
     {
         return new BorderCommand(_executor, _commandBuilder);
@@ -111,12 +109,10 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new PreviewCommand(_executor, _commandBuilder);
     }
-
     public ICommand<ConvertFormatModel> CreateConvertFormatCommand()
     {
         return new ConvertFormatCommand(_executor, _commandBuilder);
     }
-
     public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
     {
         return new MergeTwoFilesCommand(_executor, _commandBuilder);
@@ -129,10 +125,15 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new SubtitleTranslationCommand(_executor, _commandBuilder);
     }
-
-
+    public ICommand<ReduceQualityModel> CreateReduceQualityCommand()
+    {
+        return new ReduceQualityCommand(_executor, _commandBuilder);
+    }
     public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
     {
         return new ChangeResolutionCommand(_executor, _commandBuilder);
     }
 }
+
+
+

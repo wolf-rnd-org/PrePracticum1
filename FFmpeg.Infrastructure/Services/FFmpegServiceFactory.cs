@@ -5,7 +5,6 @@ using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 
@@ -34,8 +33,8 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
         ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
         ICommand<RemoveAudioModel> CreateRemoveAudioCommand();
-
         ICommand<RotateModel> CreateRotateCommand();
+
     }
 
     public class FFmpegServiceFactory : IFFmpegServiceFactory

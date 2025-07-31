@@ -22,8 +22,5 @@ jobs:
         run: dotnet restore Ffmpeg.sln
 
       - name: Build project
-<<<<<<< HEAD
         run: dotnet build Ffmpeg.sln --configuration Release --no-restore
-=======
-        run: dotnet build --configuration Release --no-restore
->>>>>>> fd56708c6850858534f4bc28fa3a1716c15ec8b7
+

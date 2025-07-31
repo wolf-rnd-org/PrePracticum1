@@ -33,8 +33,10 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<AnimatedTextModel> CreateAnimatedTextCommand();
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
         ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
+        ICommand<RemoveAudioModel> CreateRemoveAudioCommand();
+
     }
-   
+
 
 }
 public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -135,4 +137,9 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new ChangeResolutionCommand(_executor, _commandBuilder);
     }
+    public ICommand<RemoveAudioModel> CreateRemoveAudioCommand()
+    {
+        return new RemoveAudioCommand(_executor, _commandBuilder);
+    }
+
 }

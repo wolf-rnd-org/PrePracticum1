@@ -24,11 +24,12 @@ namespace FFmpeg.Infrastructure.Commands
         {
             CommandBuilder = _commandBuilder
                 .SetInput(model.InputFile)
-                .AddOption("-an") // remove audio
+                .AddOption("-an")
                 .SetOutput(model.OutputFile);
 
             return await RunAsync();
         }
+
     }
 }
 

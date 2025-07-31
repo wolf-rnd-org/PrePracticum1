@@ -4,12 +4,18 @@ using FFmpeg.Core.Models;
 using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
     {
         ICommand<WatermarkModel> CreateWatermarkCommand();
+        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
+        ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand();
         ICommand<BlackAndWhiteModel> CreateBlackAndWhiteCommand();
         ICommand<GreenScreenModel> CreateGreenScreenCommand();
         ICommand<BorderModel> CreateBorderCommand();
@@ -19,7 +25,6 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<ChangeSpeedModel> CreateChangeSpeedCommand();
         ICommand<ReverseVideoModel> CreateReverseVideoCommand();
         ICommand<AudioEffectModel> CreateAudioEffectCommand();
-        ICommand<ConvertAudioModel> CreateConvertAudioCommand();
         ICommand<FadeEffectModel> CreateFadeEffectCommand();
         ICommand<ConvertFormatModel> CreateConvertFormatCommand();
 
@@ -29,7 +34,7 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
 
     }
-
+   
 
 }
 public class FFmpegServiceFactory : IFFmpegServiceFactory
@@ -64,7 +69,10 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new FadeEffectCommand(_executor, _commandBuilder);
     }
-
+    public ICommand<CropModel> CreateCropCommand()
+    {
+        return new CropCommand(_executor, _commandBuilder);
+    }
     public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
     {
         return new ReverseVideoCommand(_executor, _commandBuilder);
@@ -79,12 +87,14 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new BorderCommand(_executor, _commandBuilder);
     }
-
-    public ICommand<CropModel> CreateCropCommand()
+    public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
     {
-        return new CropCommand(_executor, _commandBuilder);
+        return new ConvertAudioCommand(_executor, _commandBuilder);
     }
-
+    public ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand()
+    {
+        return new ConvertVideoToGifCommand(_executor, _commandBuilder);
+    }
     public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
     {
         return new TimestampOverlayCommand(_executor, _commandBuilder);
@@ -98,11 +108,6 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     public ICommand<AudioEffectModel> CreateAudioEffectCommand()
     {
         return new AudioEffectCommand(_executor, _commandBuilder);
-    }
-
-    public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
-    {
-        return new ConvertAudioCommand(_executor, _commandBuilder);
     }
 
     public ICommand<PreviewModel> CreatePreviewCommand()
@@ -124,6 +129,7 @@ public class FFmpegServiceFactory : IFFmpegServiceFactory
     {
         return new SubtitleTranslationCommand(_executor, _commandBuilder);
     }
+
 
     public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
     {

@@ -6,10 +6,8 @@ using FFmpeg.Infrastructure.Commands;
 using FFmpeg.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+
 namespace FFmpeg.Infrastructure.Services
 {
     public interface IFFmpegServiceFactory
@@ -35,112 +33,88 @@ namespace FFmpeg.Infrastructure.Services
         ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand();
         ICommand<ChangeResolutionModel> CreateChangeResolutionCommand();
         ICommand<RemoveAudioModel> CreateRemoveAudioCommand();
+        ICommand<RotateModel> CreateRotateCommand();
 
+    }
+
+    public class FFmpegServiceFactory : IFFmpegServiceFactory
+    {
+        private readonly FFmpegExecutor _executor;
+        private readonly ICommandBuilder _commandBuilder;
+
+        public FFmpegServiceFactory(IConfiguration configuration, ILogger logger = null)
+        {
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string ffmpegPath = Path.Combine(baseDirectory, "external", "ffmpeg.exe");
+            bool logOutput = bool.TryParse(configuration["FFmpeg:LogOutput"], out bool log) && log;
+            _executor = new FFmpegExecutor(ffmpegPath, logOutput, logger);
+            _commandBuilder = new CommandBuilder(configuration);
+        }
+
+        public ICommand<WatermarkModel> CreateWatermarkCommand()
+            => new WatermarkCommand(_executor, _commandBuilder);
+
+        public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
+            => new ConvertAudioCommand(_executor, _commandBuilder);
+
+        public ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand()
+            => new ConvertVideoToGifCommand(_executor, _commandBuilder);
+
+        public ICommand<BlackAndWhiteModel> CreateBlackAndWhiteCommand()
+            => new BlackAndWhiteCommand(_executor, _commandBuilder);
+
+        public ICommand<GreenScreenModel> CreateGreenScreenCommand()
+            => new GreenScreenCommand(_executor, _commandBuilder);
+
+        public ICommand<BorderModel> CreateBorderCommand()
+            => new BorderCommand(_executor, _commandBuilder);
+
+        public ICommand<CropModel> CreateCropCommand()
+            => new CropCommand(_executor, _commandBuilder);
+
+        public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
+            => new ExtractFrameCommand(_executor, _commandBuilder);
+
+        public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
+            => new TimestampOverlayCommand(_executor, _commandBuilder);
+
+        public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
+            => new ChangeSpeedCommand(_executor, _commandBuilder);
+
+        public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
+            => new ReverseVideoCommand(_executor, _commandBuilder);
+
+        public ICommand<AudioEffectModel> CreateAudioEffectCommand()
+            => new AudioEffectCommand(_executor, _commandBuilder);
+
+        public ICommand<FadeEffectModel> CreateFadeEffectCommand()
+            => new FadeEffectCommand(_executor, _commandBuilder);
+
+        public ICommand<ReduceQualityModel> CreateReduceQualityCommand()
+            => new ReduceQualityCommand(_executor, _commandBuilder);
+
+        public ICommand<ConvertFormatModel> CreateConvertFormatCommand()
+            => new ConvertFormatCommand(_executor, _commandBuilder);
+
+        public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
+            => new MergeTwoFilesCommand(_executor, _commandBuilder);
+
+        public ICommand<PreviewModel> CreatePreviewCommand()
+            => new PreviewCommand(_executor, _commandBuilder);
+
+        public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
+            => new AnimatedTextCommand(_executor, _commandBuilder);
+
+        public ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand()
+            => new SubtitleTranslationCommand(_executor, _commandBuilder);
+
+        public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
+            => new ChangeResolutionCommand(_executor, _commandBuilder);
+
+        public ICommand<RemoveAudioModel> CreateRemoveAudioCommand()
+            => new RemoveAudioCommand(_executor, _commandBuilder);
+
+        public ICommand<RotateModel> CreateRotateCommand()
+            => new RotateCommand(_executor, _commandBuilder);
     }
 }
-public class FFmpegServiceFactory : IFFmpegServiceFactory
-{
-    private readonly FFmpegExecutor _executor;
-    private readonly ICommandBuilder _commandBuilder;
-    public FFmpegServiceFactory(IConfiguration configuration, ILogger logger = null)
-    {
-        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        string ffmpegPath = Path.Combine(baseDirectory, "external", "ffmpeg.exe");
-        bool logOutput = bool.TryParse(configuration["FFmpeg:LogOutput"], out bool log) && log;
-        _executor = new FFmpegExecutor(ffmpegPath, logOutput, logger);
-        _commandBuilder = new CommandBuilder(configuration);
-    }
-    public ICommand<WatermarkModel> CreateWatermarkCommand()
-    {
-        return new WatermarkCommand(_executor, _commandBuilder);
-    }
-
-    public ICommand<BlackAndWhiteModel> CreateBlackAndWhiteCommand()
-    {
-        return new BlackAndWhiteCommand(_executor, _commandBuilder);
-    }
-
-    public ICommand<ExtractFrameInput> CreateExtractFrameCommand()
-    {
-        return new ExtractFrameCommand(_executor, _commandBuilder);
-    }
-
-    public ICommand<FadeEffectModel> CreateFadeEffectCommand()
-    {
-        return new FadeEffectCommand(_executor, _commandBuilder);
-    }
-    public ICommand<CropModel> CreateCropCommand()
-    {
-        return new CropCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ReverseVideoModel> CreateReverseVideoCommand()
-    {
-        return new ReverseVideoCommand(_executor, _commandBuilder);
-    }
-
-    public ICommand<GreenScreenModel> CreateGreenScreenCommand()
-    {
-        return new GreenScreenCommand(_executor, _commandBuilder);
-    }
-    public ICommand<BorderModel> CreateBorderCommand()
-    {
-        return new BorderCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ConvertVideoToGifModel> CreateConvertVideoToGifCommand()
-    {
-        return new ConvertVideoToGifCommand(_executor, _commandBuilder);
-    }
-    public ICommand<TimestampOverlayModel> CreateTimestampOverlayCommand()
-    {
-        return new TimestampOverlayCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ChangeSpeedModel> CreateChangeSpeedCommand()
-    {
-        return new ChangeSpeedCommand(_executor, _commandBuilder);
-    }
-
-    public ICommand<AudioEffectModel> CreateAudioEffectCommand()
-    {
-        return new AudioEffectCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ConvertAudioModel> CreateConvertAudioCommand()
-    {
-        return new ConvertAudioCommand(_executor, _commandBuilder);
-    }
-    public ICommand<PreviewModel> CreatePreviewCommand()
-    {
-        return new PreviewCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ConvertFormatModel> CreateConvertFormatCommand()
-    {
-        return new ConvertFormatCommand(_executor, _commandBuilder);
-    }
-    public ICommand<MergeTwoFilesModel> CreateMergeTwoFilesCommand()
-    {
-        return new MergeTwoFilesCommand(_executor, _commandBuilder);
-    }
-    public ICommand<AnimatedTextModel> CreateAnimatedTextCommand()
-    {
-        return new AnimatedTextCommand(_executor, _commandBuilder);
-    }
-    public ICommand<SubtitleTranslationModel> CreateSubtitleTranslationCommand()
-    {
-        return new SubtitleTranslationCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ReduceQualityModel> CreateReduceQualityCommand()
-    {
-        return new ReduceQualityCommand(_executor, _commandBuilder);
-    }
-    public ICommand<ChangeResolutionModel> CreateChangeResolutionCommand()
-    {
-        return new ChangeResolutionCommand(_executor, _commandBuilder);
-    }
-    public ICommand<RemoveAudioModel> CreateRemoveAudioCommand()
-    {
-        return new RemoveAudioCommand(_executor, _commandBuilder);
-    }
-}
-
-
-
-
